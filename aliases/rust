@@ -6,4 +6,4 @@ docker run \
     -v $(pwd):/var/apps/src \
     -e USER=$USER \
     --entrypoint /bin/sh \
-    rust:1.39.0-alpine $@
+    rust $@

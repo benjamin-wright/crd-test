@@ -1,4 +1,4 @@
-.PHONY: image
+.PHONY: build
 
-image:
-	docker build
+build:
+	docker build .
