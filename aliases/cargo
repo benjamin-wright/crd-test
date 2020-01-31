@@ -1,0 +1,10 @@
+#!/bin/bash
+
+docker run \
+    --rm -it \
+    -w /var/apps/src \
+    -v $(pwd):/var/apps/src \
+    -v cargo_cache:/usr/local/cargo/registry \
+    -e USER=$USER \
+    -e RUST_BACKTRACE=1 \
+    rust:1.39.0-alpine cargo $@
