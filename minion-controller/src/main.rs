@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate serde_derive;
 
+use futures::StreamExt;
 use kube::{
-    api::{Object, RawApi, Informer, WatchEvent, Void},
+    api::{Informer, Object, RawApi, Void, WatchEvent},
     client::APIClient,
     config,
 };
@@ -16,25 +17,43 @@ pub struct Task {
 
 type KubeTask = Object<Task, Void>;
 
-fn main() {
-    let kubeconfig = config::load_kube_config().expect("kubeconfig failed to load");
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Load the kubeconfig file.
+    let kubeconfig = config::load_kube_config().await?;
+
+    // Create a new client
     let client = APIClient::new(kubeconfig);
+
+    // Set a namespace. We're just hard-coding for now.
     let namespace = "default";
+
     let resource = RawApi::customResource("tasks")
         .group("minion.ponglehub.com")
         .within(&namespace);
 
-    let informer = Informer::raw(client, resource).init().expect("informer init failed");
+    // Create our informer and start listening.
+    let informer = Informer::raw(client, resource)
+        .init()
+        .await?;
+
     loop {
-        informer.poll().expect("informer poll failed");
+        let mut tasks = informer.poll().await?.boxed();
 
         // Now we just do something each time a new book event is triggered.
-        while let Some(event) = informer.pop() {
-            handle(event);
+        while let Some(event) = tasks.next().await {
+            handle(event?);
         }
     }
 }
 
 fn handle(event: WatchEvent<KubeTask>) {
-    println!("Something happened to a task")
+    match event {
+        WatchEvent::Added(task) => println!(
+            "Added a task {} from pipeline '{}'",
+            task.metadata.name, task.spec.pipeline
+        ),
+        WatchEvent::Deleted(task) => println!("Deleted a task {}", task.metadata.name),
+        _ => println!("another event"),
+    }
 }
