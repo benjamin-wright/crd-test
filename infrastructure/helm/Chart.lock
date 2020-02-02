@@ -1,0 +1,15 @@
+dependencies:
+- name: nginx-ingress
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.29.2
+- name: metrics-server
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 2.9.0
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: 0.13.0
+- name: docker-registry
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.9.1
+digest: sha256:092baeb2d8081221d60303bd6f4f07fe449b842dd1b2dbd8d1bb7e5af7046f73
+generated: "2020-02-02T18:17:49.062013Z"

@@ -22,7 +22,10 @@ stop:
 	kind delete cluster --name crd-test
 
 start-k8s:
-	kind create cluster --name crd-test
+	kind create --config infrastructure/kind-config.yaml cluster --name crd-test
+	kubectl create namespace infra
+	helm dependencies update infrastructure/helm
+	helm install infra --namespace infra infrastructure/helm
 
 install:
 	helm install minion helm

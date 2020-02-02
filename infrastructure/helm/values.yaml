@@ -1,0 +1,25 @@
+nginx-ingress:
+  controller:
+    service:
+      type: NodePort
+      nodePorts:
+        http: 30080
+        https: 30443
+
+metrics-server:
+  args:
+    - --kubelet-insecure-tls
+    - --kubelet-preferred-address-types=InternalIP
+
+docker-registry:
+  ingress:
+    enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 0m
+      cert-manager.io/cluster-issuer: selfsigning-issuer
+    hosts:
+    - docker.ponglehub.co.uk 
+    tls:
+    - hosts:
+      - docker.ponglehub.co.uk
+      secretName: tls-cert
