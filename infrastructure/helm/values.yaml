@@ -12,13 +12,16 @@ metrics-server:
     - --kubelet-preferred-address-types=InternalIP
 
 docker-registry:
+  service:
+    type: NodePort
+    nodePort: 31500
   ingress:
     enabled: true
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 0m
       cert-manager.io/cluster-issuer: selfsigning-issuer
     hosts:
-    - docker.ponglehub.co.uk 
+    - docker.ponglehub.co.uk
     tls:
     - hosts:
       - docker.ponglehub.co.uk

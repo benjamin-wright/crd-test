@@ -20,7 +20,7 @@ type KubeTask = Object<Task, Void>;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Load the kubeconfig file.
-    let kubeconfig = config::load_kube_config().await?;
+    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
     let client = APIClient::new(kubeconfig);
@@ -29,8 +29,7 @@ async fn main() -> anyhow::Result<()> {
     let namespace = "default";
 
     let resource = RawApi::customResource("tasks")
-        .group("minion.ponglehub.com")
-        .within(&namespace);
+        .group("minion.ponglehub.com");
 
     // Create our informer and start listening.
     let informer = Informer::raw(client, resource)

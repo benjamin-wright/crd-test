@@ -1,7 +1,4 @@
-FROM rust:1.39.0-slim as build
-
-RUN apt-get update && apt-get install libssl-dev pkg-config -y
-WORKDIR /var/app/src
+FROM ekidd/rust-musl-builder as build
 
 COPY . .
 
@@ -9,6 +6,6 @@ RUN cargo build --release
 
 FROM scratch
 
-COPY --from=build /var/app/src/target/release/src /var/app/controller
+COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/minion-controller /minion-controller
 
-ENTRYPOINT [ "/var/app/controller" ]
+ENTRYPOINT [ "/minion-controller" ]

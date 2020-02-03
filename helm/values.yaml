@@ -1,0 +1,2 @@
+minion_controller:
+    image: benwright/minion-controller

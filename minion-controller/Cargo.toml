@@ -1,5 +1,5 @@
 [package]
-name = "src"
+name = "minion-controller"
 version = "0.1.0"
 authors = ["wrbe9001"]
 edition = "2018"

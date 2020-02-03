@@ -1,0 +1,21 @@
+version: v1beta6
+images:
+  minion-controller:
+    image: localhost:31500/minion-controller
+    dockerfile: ./minion-controller/Dockerfile
+    context: ./minion-controller
+
+deployments:
+- name: crd-test
+  helm:
+    chart:
+      name: helm
+    values:
+      minion_controller:
+        image: localhost:31500/minion-controller
+
+commands:
+- name: init
+  command: ./scripts/start.sh
+- name: clean
+  command: ./scripts/stop.sh

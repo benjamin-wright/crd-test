@@ -1,9 +1,0 @@
-#!/bin/bash
-
-docker run \
-    --rm -it \
-    -w /var/apps/src \
-    -v $(pwd):/var/apps/src \
-    -e USER=$USER \
-    --entrypoint /bin/sh \
-    rust $@

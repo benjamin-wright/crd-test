@@ -12,7 +12,7 @@ spec:
       labels:
         app: minion-controller
     spec:
+      serviceAccountName: task-reader
       containers:
         - name: minion-controller
-          # image: infra-docker-registry.infra.svc.cluster.local:5000/minion-controller
-          image: minion-controller
+          image: {{ .Values.minion_controller.image }}
