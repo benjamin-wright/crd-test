@@ -6,13 +6,19 @@ images:
     context: ./minion-controller
 
 deployments:
-- name: crd-test
+- name: operator
   helm:
     chart:
-      name: helm
+      name: helm/operator
     values:
       minion_controller:
         image: localhost:31500/minion-controller
+- name: pipeline
+  helm:
+    chart:
+      name: helm/pipeline
+    values:
+      namespace: test-pipeline
 
 commands:
 - name: init

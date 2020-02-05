@@ -1,0 +1,2 @@
+minion_controller:
+    image: localhost:5000/minion-controller

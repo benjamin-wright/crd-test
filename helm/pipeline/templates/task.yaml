@@ -2,6 +2,7 @@ apiVersion: "minion.ponglehub.com/v1"
 kind: Task
 metadata:
   name: my-task
+  namespace: {{ $.Values.namespace }}
 spec:
   pipeline: parent-pipeline
   image: task-image

@@ -1,5 +1,13 @@
 FROM ekidd/rust-musl-builder as build
 
+COPY Cargo.toml Cargo.toml
+
+RUN mkdir -p src \
+    && echo "fn main() { println!(\"Hello World!\") }" > src/main.rs \
+    && cargo build --release \
+    && rm -rf src \
+    && rm -rf target
+
 COPY . .
 
 RUN cargo build --release

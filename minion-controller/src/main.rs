@@ -3,7 +3,7 @@ extern crate serde_derive;
 
 use futures::StreamExt;
 use kube::{
-    api::{Informer, Object, RawApi, Void, WatchEvent},
+    api::{Informer, ListParams, Object, RawApi, Void, WatchEvent},
     client::APIClient,
     config,
 };
@@ -25,22 +25,23 @@ async fn main() -> anyhow::Result<()> {
     // Create a new client
     let client = APIClient::new(kubeconfig);
 
-    // Set a namespace. We're just hard-coding for now.
-    let namespace = "default";
-
-    let resource = RawApi::customResource("tasks")
+    let tasks = RawApi::customResource("tasks")
         .group("minion.ponglehub.com");
 
+    for t in tasks.list(&ListParams::default()).await? {
+        loadTask(t);
+    }
+
     // Create our informer and start listening.
-    let informer = Informer::raw(client, resource)
+    let informer = Informer::raw(client, tasks)
         .init()
         .await?;
 
     loop {
-        let mut tasks = informer.poll().await?.boxed();
+        let mut taskEvents = informer.poll().await?.boxed();
 
-        // Now we just do something each time a new book event is triggered.
-        while let Some(event) = tasks.next().await {
+        // Now we just do something each time a new task event is triggered.
+        while let Some(event) = taskEvents.next().await {
             handle(event?);
         }
     }
@@ -48,11 +49,21 @@ async fn main() -> anyhow::Result<()> {
 
 fn handle(event: WatchEvent<KubeTask>) {
     match event {
-        WatchEvent::Added(task) => println!(
-            "Added a task {} from pipeline '{}'",
-            task.metadata.name, task.spec.pipeline
-        ),
-        WatchEvent::Deleted(task) => println!("Deleted a task {}", task.metadata.name),
+        WatchEvent::Added(task) => loadTask(task),
+        WatchEvent::Deleted(task) => removedTask(task),
         _ => println!("another event"),
     }
+}
+
+fn loadTask(task: KubeTask) {
+    println!(
+        "Added a task {}:{} from pipeline '{}'",
+        task.metadata.namespace.expect("Namespace not defined"),
+        task.metadata.name,
+        task.spec.pipeline
+    )
+}
+
+fn removedTask(task: KubeTask) {
+    println!("Deleted a task {}", task.metadata.name)
 }
