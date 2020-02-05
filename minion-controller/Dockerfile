@@ -5,8 +5,7 @@ COPY Cargo.toml Cargo.toml
 RUN mkdir -p src \
     && echo "fn main() { println!(\"Hello World!\") }" > src/main.rs \
     && cargo build --release \
-    && rm -rf src \
-    && rm -rf target
+    && rm -rf src
 
 COPY . .
 

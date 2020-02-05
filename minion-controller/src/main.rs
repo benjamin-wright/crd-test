@@ -28,7 +28,7 @@ async fn main() -> anyhow::Result<()> {
     let tasks = RawApi::customResource("tasks")
         .group("minion.ponglehub.com");
 
-    for t in tasks.list(&ListParams::default()).await? {
+    for t in tasks.list(&ListParams::default()).unwrap().iter() {
         loadTask(t);
     }
 
