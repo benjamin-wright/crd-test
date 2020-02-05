@@ -7,6 +7,9 @@ RUN mkdir -p src \
     && cargo build --release \
     && rm -rf src
 
+RUN rm -rf target/x86_64-unknown-linux-musl/release/minion-controller*
+# RUN exit 1
+
 COPY . .
 
 RUN cargo build --release
