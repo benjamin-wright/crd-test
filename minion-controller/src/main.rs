@@ -19,6 +19,8 @@ type KubeTask = Object<Task, Void>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    println!("running");
+
     prepare_state().await?;
     listen_for_changes().await?;
 
