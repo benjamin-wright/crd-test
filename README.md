@@ -55,7 +55,7 @@ spec:
       - key: id-rsa.pub
         path: /root/.ssh
     env:
-    - REPO: git@github.com:username/repo.git
+      REPO: git@github.com:username/repo.git
   steps:
   - name: Load source          # Resource step schema
     resource: my-resource
@@ -90,9 +90,9 @@ apiVersion: "minion.ponglehub.com/v1"
 kind: Task
 metadata:
   name: my-task
-  pipeline: parent-pipeline
-  run: parent-pipeline-1
 spec:
+  pipeline: parent-pipeline
+  run: 1
   image: docker.io/task-image
   status: "Pending" / "Running" / "Error" / "Complete" 
 ```
@@ -103,6 +103,8 @@ spec:
 apiVersion: "minion.ponglehub.com/v1"
 kind: Version
 metadata:
+  name: my-version
+data:
   resource: my-resource
   pipeline: parent-pipeline
   version: v1.1.0

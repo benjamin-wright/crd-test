@@ -1,0 +1,33 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: tasks.minion.ponglehub.com
+spec:
+  group: minion.ponglehub.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                pipeline:
+                  type: string
+                run:
+                  type: integer
+                image:
+                  type: string
+                status:
+                  type: string
+                  enum: [ PENDING, RUNNING, ERROR, COMPLETE ]
+  scope: Namespaced
+  names:
+    plural: tasks
+    singular: task
+    kind: Task
+    shortNames:
+    - t

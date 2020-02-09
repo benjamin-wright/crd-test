@@ -2,23 +2,21 @@ version: v1beta6
 images:
   minion-controller:
     image: localhost:31500/minion-controller
-    dockerfile: ./minion-controller/Dockerfile
-    context: ./minion-controller
+    dockerfile: ./operators/minion-controller/Dockerfile
+    context: ./operators/minion-controller
 
 deployments:
-- name: operator
+- name: crds
   helm:
     chart:
-      name: helm/operator
+      name: deployment/crds
+- name: operators
+  helm:
+    chart:
+      name: deployment/operators
     values:
       minion_controller:
         image: localhost:31500/minion-controller
-- name: pipeline
-  helm:
-    chart:
-      name: helm/pipeline
-    values:
-      namespace: test-pipeline
 
 commands:
 - name: init
