@@ -121,8 +121,9 @@ Minimum required:
 
 Nice to have:
 
-| Component       | Purpose                                       |
-| ---             | ---                                           |
-| ApiServer       | Expose pipeline stats externally              |
-| UI              | A pretty UI to visualise pipelines            |
-| TaskSidecar     | Cat completed task logs to persistent storage |
+| Component       | Purpose                                                      |
+| ---             | ---                                                          |
+| ApiServer       | Expose pipeline stats externally                             |
+| UI              | A pretty UI to visualise pipelines                           |
+| TaskSidecar     | Cat completed task logs to persistent storage                |
+| LogStore        | Some kind of persistent storage for logs from completed jobs |
