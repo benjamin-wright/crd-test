@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: version-monitor-deployment
+  labels:
+    app: version-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: version-monitor
+  template:
+    metadata:
+      labels:
+        app: version-monitor
+    spec:
+      serviceAccount: version-reader
+      containers:
+      - name: version-monitor
+        image: {{ .Values.image }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}

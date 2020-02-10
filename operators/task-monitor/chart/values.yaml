@@ -1,0 +1,6 @@
+image: localhost/task-monitor
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi

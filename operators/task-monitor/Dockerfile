@@ -7,14 +7,14 @@ RUN mkdir -p src \
     && cargo build --release \
     && rm -rf src
 
-RUN find . -name '*pipeline_monitor*' -delete
+RUN find . -name '*task_monitor*' -delete
 
-COPY src src
+COPY . .
 
 RUN cargo build --release
 
 FROM scratch
 
-COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/pipeline-monitor /pipeline-monitor
+COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/task-monitor /task-monitor
 
-ENTRYPOINT [ "/pipeline-monitor" ]
+ENTRYPOINT [ "/task-monitor" ]

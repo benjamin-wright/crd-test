@@ -12,11 +12,11 @@ spec:
         openAPIV3Schema:
           type: object
           properties:
-            data:
+            spec:
               type: object
               properties:
                 resource:
-                  type: integer
+                  type: string
                 pipeline:
                   type: string
                 version:

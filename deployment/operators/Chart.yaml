@@ -5,3 +5,14 @@ description: A Helm chart for the Minion CI system
 type: application
 version: 0.1.0
 appVersion: 1.16.0
+
+dependencies:
+ - name: pipeline-monitor
+   version: ~0.1.0
+   repository: file://../../operators/pipeline-monitor/chart
+ - name: task-monitor
+   version: ~0.1.0
+   repository: file://../../operators/task-monitor/chart
+ - name: version-monitor
+   version: ~0.1.0
+   repository: file://../../operators/version-monitor/chart

@@ -12,7 +12,7 @@ spec:
         openAPIV3Schema:
           type: object
           properties:
-            data:
+            spec:
               type: object
               properties:
                 status:

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-monitor-deployment
+  labels:
+    app: pipeline-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline-monitor
+  template:
+    metadata:
+      labels:
+        app: pipeline-monitor
+    spec:
+      serviceAccount: pipeline-reader
+      containers:
+      - name: pipeline-monitor
+        image: {{ .Values.image }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}

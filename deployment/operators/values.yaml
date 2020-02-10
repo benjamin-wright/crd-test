@@ -1,2 +1,8 @@
 pipeline-monitor:
-    image: localhost:5000/pipeline-monitor
+  image: localhost:5000/pipeline-monitor
+
+task-monitor:
+  image: localhost:5000/task-monitor
+
+version-monitor:
+  image: localhost:5000/version-monitor

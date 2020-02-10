@@ -1,0 +1,12 @@
+dependencies:
+- name: pipeline-monitor
+  repository: file://../../operators/pipeline-monitor/chart
+  version: 0.1.0
+- name: task-monitor
+  repository: file://../../operators/task-monitor/chart
+  version: 0.1.0
+- name: version-monitor
+  repository: file://../../operators/version-monitor/chart
+  version: 0.1.0
+digest: sha256:9862a2ff8db00fbb9d99cfcb0f77138292cb03cf84f51a7b7f51a1238c22b26b
+generated: "2020-02-10T22:06:12.699565Z"

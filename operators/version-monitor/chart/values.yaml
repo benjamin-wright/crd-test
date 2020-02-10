@@ -1,0 +1,6 @@
+image: localhost/version-monitor
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi

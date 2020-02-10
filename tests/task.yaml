@@ -1,0 +1,9 @@
+apiVersion: "minion.ponglehub.com/v1"
+kind: Task
+metadata:
+  name: my-task
+spec:
+  pipeline: parent-pipeline
+  run: 1
+  image: docker.io/task-image
+  status: "PENDING"

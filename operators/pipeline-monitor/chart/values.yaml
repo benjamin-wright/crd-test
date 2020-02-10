@@ -1,0 +1,6 @@
+image: localhost/pipeline-monitor
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi

@@ -4,6 +4,14 @@ images:
     image: localhost:31500/pipeline-monitor
     dockerfile: ./operators/pipeline-monitor/Dockerfile
     context: ./operators/pipeline-monitor
+  task-monitor:
+    image: localhost:31500/task-monitor
+    dockerfile: ./operators/task-monitor/Dockerfile
+    context: ./operators/task-monitor
+  version-monitor:
+    image: localhost:31500/version-monitor
+    dockerfile: ./operators/version-monitor/Dockerfile
+    context: ./operators/version-monitor
 
 deployments:
 - name: crds
@@ -17,6 +25,20 @@ deployments:
     values:
       pipeline-monitor:
         image: localhost:31500/pipeline-monitor
+      task-monitor:
+        image: localhost:31500/task-monitor
+      version-monitor:
+        image: localhost:31500/version-monitor
+
+hooks:
+  - command: helm
+    args:
+      - dependency
+      - update
+      - ./deployment/operators
+    when:
+      before:
+        deployments: all
 
 commands:
 - name: deploy
@@ -25,7 +47,7 @@ commands:
   command: ./scripts/start.sh
 - name: clean
   command: ./scripts/stop.sh
-- name: add-pipeline
-  command: kubectl apply -f tests/pipeline.yaml
-- name: remove-pipeline
-  command: kubectl delete -f tests/pipeline.yaml
+- name: add-resources
+  command: kubectl apply -f tests
+- name: remove-resources
+  command: kubectl delete -f tests

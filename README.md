@@ -80,7 +80,7 @@ apiVersion: "minion.ponglehub.com/v1"
 kind: PipelineRun
 metadata:
   name: my-pipeline-1
-data:
+spec:
   status: "Pending" / "Running" / "Error" / "Complete"
   currentTask: task-name / None
 ```
@@ -106,7 +106,7 @@ apiVersion: "minion.ponglehub.com/v1"
 kind: Version
 metadata:
   name: my-version
-data:
+spec:
   resource: my-resource
   pipeline: parent-pipeline
   version: v1.1.0
@@ -120,7 +120,7 @@ Minimum required:
 | ---             | ---                                                                                                         |
 | PipelineMonitor | Watch for new pipelines, manage cronjobs for checking resources                                             |
 | VersionSidecar  | Sit alongside a resource container, grab version from shared PVC when found and update version resources    |
-| TriggerMonitor  | Manage tasks, create PVC and initial task when new resource versions found                                  |
+| VersionMonitor  | Manage tasks, create PVC and initial task when new resource versions found                                  |
 | TaskMonitor     | Watch for new tasks being added, create jobs to run those tasks and update tasks when jobs complete or fail |
 
 Nice to have:
