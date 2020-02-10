@@ -1,5 +1,5 @@
 [package]
-name = "minion-controller"
+name = "pipeline-monitor"
 version = "0.1.0"
 authors = ["wrbe9001"]
 edition = "2018"

@@ -47,7 +47,7 @@ metadata:
   name: my-pipeline
 spec:
   resources:
-    name: my-resource
+  - name: my-resource
     trigger: true
     secrets:
     - name: my-config
@@ -63,10 +63,12 @@ spec:
     path: some/sub/path
   - name: Install deps         # Task schema
     image: docker.io/node
-    command: npm run install
+    command:
+    - npm run install
   - name: Run tests
     image: docker.io/node
-    command: npm run test
+    command:
+    - npm run test
 ```
 
 ## Custom Resources For Internal Use
@@ -94,7 +96,7 @@ spec:
   pipeline: parent-pipeline
   run: 1
   image: docker.io/task-image
-  status: "Pending" / "Running" / "Error" / "Complete" 
+  status: "Pending" / "Running" / "Error" / "Complete"
 ```
 
 ### Version

@@ -1,9 +1,9 @@
 version: v1beta6
 images:
-  minion-controller:
-    image: localhost:31500/minion-controller
-    dockerfile: ./operators/minion-controller/Dockerfile
-    context: ./operators/minion-controller
+  pipeline-monitor:
+    image: localhost:31500/pipeline-monitor
+    dockerfile: ./operators/pipeline-monitor/Dockerfile
+    context: ./operators/pipeline-monitor
 
 deployments:
 - name: crds
@@ -15,11 +15,17 @@ deployments:
     chart:
       name: deployment/operators
     values:
-      minion_controller:
-        image: localhost:31500/minion-controller
+      pipeline-monitor:
+        image: localhost:31500/pipeline-monitor
 
 commands:
+- name: deploy
+  command: devspace deploy
 - name: init
   command: ./scripts/start.sh
 - name: clean
   command: ./scripts/stop.sh
+- name: add-pipeline
+  command: kubectl apply -f tests/pipeline.yaml
+- name: remove-pipeline
+  command: kubectl delete -f tests/pipeline.yaml

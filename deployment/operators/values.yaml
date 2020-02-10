@@ -1,2 +1,2 @@
-minion_controller:
-    image: localhost:5000/minion-controller
+pipeline-monitor:
+    image: localhost:5000/pipeline-monitor

@@ -7,8 +7,7 @@ RUN mkdir -p src \
     && cargo build --release \
     && rm -rf src
 
-RUN rm -rf target/x86_64-unknown-linux-musl/release/minion-controller*
-# RUN exit 1
+RUN rm -rf target/x86_64-unknown-linux-musl/release/pipeline*
 
 COPY . .
 
@@ -16,6 +15,6 @@ RUN cargo build --release
 
 FROM scratch
 
-COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/minion-controller /minion-controller
+COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/pipeline-monitor /pipeline-monitor
 
-ENTRYPOINT [ "/minion-controller" ]
+ENTRYPOINT [ "/pipeline-monitor" ]
