@@ -4,7 +4,7 @@ metadata:
   name: my-pipeline
 spec:
   resources:
-  - name: my-resource
+  - name: git-resource
     trigger: true
     secrets:
     - name: my-config
