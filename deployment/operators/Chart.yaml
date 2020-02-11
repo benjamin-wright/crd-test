@@ -9,10 +9,13 @@ appVersion: 1.16.0
 dependencies:
  - name: pipeline-monitor
    version: ~0.1.0
-   repository: file://../../operators/pipeline-monitor/chart
+   repository: file://../../components/operators/pipeline-monitor/chart
  - name: task-monitor
    version: ~0.1.0
-   repository: file://../../operators/task-monitor/chart
+   repository: file://../../components/operators/task-monitor/chart
  - name: version-monitor
    version: ~0.1.0
-   repository: file://../../operators/version-monitor/chart
+   repository: file://../../components/operators/version-monitor/chart
+ - name: git-resource
+   version: ~0.1.0
+   repository: file://../../components/resources/git-resource/chart

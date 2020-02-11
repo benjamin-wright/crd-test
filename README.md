@@ -1,6 +1,6 @@
-# K8s CRD-based continuous integration service
+# Minion CI
 
-An entirely kubernetes-based CI system, using CRD as the specification language and a combination of operators and kubernetes primitives to do the heavy lifting.
+An entirely kubernetes-based CI system, using CRDs as the specification language and a combination of operators and kubernetes primitives to do the heavy lifting.
 
 ## Custom Resources For The User
 
@@ -16,13 +16,13 @@ A resource is a way of checking an external data source for the latest version, 
 
 You can specify additional accepted environment variables with the `additionalVars` block
 
-The image must implement:
+The image must implement the following commands:
 
-| Executable | Description                                               |
-| ---        | ---                                                       |
-| version    | Writes a string value into the /version.txt file          |
-| load       | Writes the loaded data to the /input directory (optional) |
-| version    | Writes a string value into the /version file (optional)   |
+| Executable | Description                                                               |
+| ---        | ---                                                                       |
+| version    | Writes a string value into the /version.txt file                          |
+| load       | Writes the loaded data to the /input directory (optional)                 |
+| push       | Updates the resource with the content of the /output directory (optional) |
 
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"
@@ -119,7 +119,7 @@ Minimum required:
 | Component       | Purpose                                                                                                     |
 | ---             | ---                                                                                                         |
 | PipelineMonitor | Watch for new pipelines, manage cronjobs for checking resources                                             |
-| VersionSidecar  | Sit alongside a resource container, grab version from shared PVC when found and update version resources    |
+| ResourceSidecar | Sit alongside a resource container, grab version from shared volume when found and update version resources |
 | VersionMonitor  | Manage tasks, create PVC and initial task when new resource versions found                                  |
 | TaskMonitor     | Watch for new tasks being added, create jobs to run those tasks and update tasks when jobs complete or fail |
 

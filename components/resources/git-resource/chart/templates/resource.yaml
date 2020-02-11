@@ -1,0 +1,10 @@
+apiVersion: "minion.ponglehub.com/v1"
+kind: Resource
+metadata:
+  name: {{ .Values.name }}
+spec:
+  image: {{ .Values.image }}
+  additionalVars:
+  - REPO
+  - BRANCH
+  - SSH_KEY

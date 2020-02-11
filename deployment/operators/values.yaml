@@ -6,3 +6,6 @@ task-monitor:
 
 version-monitor:
   image: localhost:5000/version-monitor
+
+git-resource:
+  image: localhost:5000/git-resource

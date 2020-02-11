@@ -2,16 +2,24 @@ version: v1beta6
 images:
   pipeline-monitor:
     image: localhost:31500/pipeline-monitor
-    dockerfile: ./operators/pipeline-monitor/Dockerfile
-    context: ./operators/pipeline-monitor
+    dockerfile: ./components/operators/pipeline-monitor/Dockerfile
+    context: ./components/operators/pipeline-monitor
   task-monitor:
     image: localhost:31500/task-monitor
-    dockerfile: ./operators/task-monitor/Dockerfile
-    context: ./operators/task-monitor
+    dockerfile: ./components/operators/task-monitor/Dockerfile
+    context: ./components/operators/task-monitor
   version-monitor:
     image: localhost:31500/version-monitor
-    dockerfile: ./operators/version-monitor/Dockerfile
-    context: ./operators/version-monitor
+    dockerfile: ./components/operators/version-monitor/Dockerfile
+    context: ./components/operators/version-monitor
+  resource-sidecar:
+    image: localhost:31500/resource-sidecar
+    dockerfile: ./components/resources/resource-sidecar/Dockerfile
+    context: ./components/resources/resource-sidecar
+  git-resource:
+    image: localhost:31500/git-resource
+    dockerfile: ./components/resources/git-resource/Dockerfile
+    context: ./components/resources/git-resource
 
 deployments:
 - name: crds
@@ -29,6 +37,8 @@ deployments:
         image: localhost:31500/task-monitor
       version-monitor:
         image: localhost:31500/version-monitor
+      git-resource:
+        image: localhost:31500/git-resource
 
 hooks:
   - command: helm

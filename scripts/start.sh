@@ -6,4 +6,4 @@ devspace use namespace crd-test
 
 kubectl create namespace infra
 helm dependencies update infrastructure/helm
-helm upgrade -i infra --namespace infra infrastructure/helm
+helm upgrade -i --wait infra --namespace infra infrastructure/helm

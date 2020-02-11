@@ -1,12 +1,15 @@
 dependencies:
 - name: pipeline-monitor
-  repository: file://../../operators/pipeline-monitor/chart
+  repository: file://../../components/operators/pipeline-monitor/chart
   version: 0.1.0
 - name: task-monitor
-  repository: file://../../operators/task-monitor/chart
+  repository: file://../../components/operators/task-monitor/chart
   version: 0.1.0
 - name: version-monitor
-  repository: file://../../operators/version-monitor/chart
+  repository: file://../../components/operators/version-monitor/chart
   version: 0.1.0
-digest: sha256:9862a2ff8db00fbb9d99cfcb0f77138292cb03cf84f51a7b7f51a1238c22b26b
-generated: "2020-02-10T22:06:12.699565Z"
+- name: git-resource
+  repository: file://../../components/resources/git-resource/chart
+  version: 0.1.0
+digest: sha256:7213b9c6f98504ef6234ea719b45b3a0fc340d4aa3382780c9eea798ad8c93d6
+generated: "2020-02-11T12:50:22.328871Z"
