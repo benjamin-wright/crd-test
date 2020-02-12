@@ -5,7 +5,7 @@ An entirely kubernetes-based CI system, using CRDs as the specification language
 ## Custom Resources For The User
 
 ### Resource
-
+---
 A resource is a way of checking an external data source for the latest version, loading data and publishing data. It must accept:
 
 | ENV_VAR     | Description                                           |
@@ -39,7 +39,7 @@ spec:
 > NB: Should try to implement `git` and `docker` resource types.
 
 ### Pipeline
-
+---
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"
 kind: Pipeline
@@ -74,7 +74,7 @@ spec:
 ## Custom Resources For Internal Use
 
 ### PipelineRun
-
+---
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"
 kind: PipelineRun
@@ -86,7 +86,7 @@ spec:
 ```
 
 ### Task
-
+---
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"
 kind: Task
@@ -100,7 +100,7 @@ spec:
 ```
 
 ### Version
-
+---
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"
 kind: Version
@@ -120,7 +120,7 @@ Minimum required:
 | ---             | ---                                                                                                         |
 | PipelineMonitor | Watch for new pipelines, manage cronjobs for checking resources                                             |
 | ResourceSidecar | Sit alongside a resource container, grab version from shared volume when found and update version resources |
-| VersionMonitor  | Manage tasks, create PVC and initial task when new resource versions found                                  |
+| VersionMonitor  | Create PVC and pipeline run when new resource versions found                                                |
 | TaskMonitor     | Watch for new tasks being added, create jobs to run those tasks and update tasks when jobs complete or fail |
 
 Nice to have:
@@ -131,3 +131,41 @@ Nice to have:
 | UI              | A pretty UI to visualise pipelines                           |
 | TaskSidecar     | Cat completed task logs to persistent storage                |
 | LogStore        | Some kind of persistent storage for logs from completed jobs |
+
+## Flow
+
+```mermaid
+
+graph LR;
+  pipeline(pipeline)
+
+  user --> pipeline;
+  pipeline --> PipelineMonitor;
+  PipelineMonitor --> resource;
+  PipelineMonitor --> sidecar;
+
+  subgraph ResourcePod
+    sidecar;
+    resource;
+    volume;
+
+    resource --> volume;
+    sidecar --> volume;
+  end
+
+  sidecar --> Version;
+  Version --> VersionMonitor;
+  VersionMonitor --> Run;
+  Run --> TaskMonitor;
+  TaskMonitor --> TaskImage;
+  TaskMonitor --> TaskSidecar;
+
+  subgraph TaskPod
+    TaskSidecar[sidecar];
+    TaskImage;
+    TaskVolume[volume];
+
+    TaskSidecar --> TaskVolume;
+    TaskImage --> TaskVolume;
+  end
+```
