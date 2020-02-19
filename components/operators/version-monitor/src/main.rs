@@ -91,6 +91,7 @@ async fn listen_for_changes() -> anyhow::Result<()> {
 fn handle(event: WatchEvent<KubeVersion>) {
     match event {
         WatchEvent::Added(version) => load_version(version),
+        WatchEvent::Modified(version) => updated_version(version),
         WatchEvent::Deleted(version) => removed_version(version),
         _ => println!("another event"),
     }
@@ -106,6 +107,16 @@ fn load_version(version: KubeVersion) {
     );
 }
 
+fn updated_version(version: KubeVersion) {
+    println!(
+        "Updated a version in namespace '{}': {} -> {}:{}",
+        version.metadata.namespace.as_ref().expect("Namespace not defined"),
+        version.spec.pipeline,
+        version.spec.resource,
+        version.spec.version
+    );
+}
+
 fn removed_version(version: KubeVersion) {
     println!(
         "Deleted a version from namespace '{}': {} -> {}:{}",
@@ -114,4 +125,14 @@ fn removed_version(version: KubeVersion) {
         version.spec.resource,
         version.spec.version
     );
+}
+
+async fn deploy_version(version: KubeVersion) {
+    // Load the kubeconfig file.
+    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
+
+    // Create a new client
+    let client = APIClient::new(kubeconfig);
+
+    
 }
