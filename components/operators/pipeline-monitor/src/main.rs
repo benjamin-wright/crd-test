@@ -122,6 +122,7 @@ async fn listen_for_changes() -> anyhow::Result<()> {
 fn handle(event: WatchEvent<KubePipeline>) {
     match event {
         WatchEvent::Added(pipeline) => load_pipeline(pipeline),
+        WatchEvent::Modified(pipeline) => updated_pipeline(pipeline),
         WatchEvent::Deleted(pipeline) => removed_pipeline(pipeline),
         _ => println!("another event"),
     }
@@ -130,6 +131,14 @@ fn handle(event: WatchEvent<KubePipeline>) {
 fn load_pipeline(pipeline: KubePipeline) {
     println!(
         "Added a pipeline to namespace '{}': {}",
+        pipeline.metadata.namespace.as_ref().expect("Namespace not defined"),
+        pipeline.metadata.name
+    );
+}
+
+fn updated_pipeline(pipeline: KubePipeline) {
+    println!(
+        "Updated a pipeline to namespace '{}': {}",
         pipeline.metadata.namespace.as_ref().expect("Namespace not defined"),
         pipeline.metadata.name
     );

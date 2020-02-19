@@ -126,13 +126,3 @@ fn removed_version(version: KubeVersion) {
         version.spec.version
     );
 }
-
-async fn deploy_version(version: KubeVersion) {
-    // Load the kubeconfig file.
-    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
-
-    // Create a new client
-    let client = APIClient::new(kubeconfig);
-
-    
-}
