@@ -20,16 +20,14 @@ pub struct SecretKey {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Secret {
     pub name: String,
-    #[serde(flatten)]
-    pub keys: Option<Vec<SecretKey>>
+    pub keys: Vec<SecretKey>
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Resource {
     pub name: String,
     pub trigger: bool,
-    #[serde(flatten)]
-    pub secrets: Option<Vec<Secret>>,
+    pub secrets: Vec<Secret>,
     pub env: BTreeMap<String, String>
 }
 
@@ -40,7 +38,7 @@ pub struct Step {
     pub action: Option<String>,
     pub path: Option<String>,
     pub image: Option<String>,
-    pub command: Option<String>
+    pub command: Option<Vec<String>>
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
