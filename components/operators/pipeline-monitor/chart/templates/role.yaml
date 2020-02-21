@@ -4,5 +4,8 @@ metadata:
   name: pipeline-reader
 rules:
 - apiGroups: ["minion.ponglehub.com"] # "" indicates the core API group
-  resources: ["pipelines"]
+  resources: ["pipelines", "resources"]
   verbs: ["get", "watch", "list"]
+- apiGroups: ["extensions", "apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "create", "delete"]
