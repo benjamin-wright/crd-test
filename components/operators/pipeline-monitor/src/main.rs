@@ -45,10 +45,8 @@ pub struct Step {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Pipeline {
-    #[serde(flatten)]
-    pub resources: Option<Vec<Resource>>,
-    #[serde(flatten)]
-    pub steps: Option<Vec<Step>>
+    pub resources: Vec<Resource>,
+    pub steps: Vec<Step>
 }
 
 type KubePipeline = Object<Pipeline, Void>;
@@ -150,8 +148,29 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
     let client = APIClient::new(kubeconfig);
 
     let deployments = Api::v1Deployment(client).within(namespace);
-    let deployment_name = pipeline.metadata.name.clone() + "-" + "git-resource";
 
+    println!("{:?}", pipeline.spec);
+
+    for resource in &pipeline.spec.resources {
+        if !resource.trigger {
+            println!(
+                "Found non-triggering resource {} for pipeline '{}': {}",
+                resource.name,
+                namespace,
+                pipeline.metadata.name
+            );
+
+            println!(
+                "Looking up resource '{}': {}",
+                namespace,
+                pipeline.metadata.name
+            );
+
+            continue;
+        }
+    }
+
+    let deployment_name = pipeline.metadata.name.clone() + "-" + "git-resource";
     let deployment_manifest = json!({
         "apiVersion": "apps/v1",
         "kind": "Deployment",
