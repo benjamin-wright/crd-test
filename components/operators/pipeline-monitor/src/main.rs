@@ -158,14 +158,14 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
                 pipeline.metadata.name
             );
 
-            println!(
-                "Looking up resource '{}': {}",
-                namespace,
-                pipeline.metadata.name
-            );
-
             continue;
         }
+
+        println!(
+            "Looking up resource '{}': {}",
+            namespace,
+            pipeline.metadata.name
+        );
     }
 
     let deployment_name = pipeline.metadata.name.clone() + "-" + "git-resource";
