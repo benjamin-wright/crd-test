@@ -2,14 +2,14 @@
 extern crate serde_derive;
 
 mod pipelines;
-use pipelines::api::{ get_current_pipelines, get_pipelines_api };
+use pipelines::api::{ get_current_pipelines, get_pipeline_changes };
 use pipelines::state::{ KubePipeline };
 
 use serde_json::json;
 
-use futures::{executor, StreamExt};
+use futures::executor;
 use kube::{
-    api::{Api, Informer, WatchEvent, PostParams},
+    api::{Api, WatchEvent, PostParams},
     client::APIClient,
     config,
 };
@@ -39,27 +39,9 @@ async fn prepare_state() -> Result<(), anyhow::Error> {
 }
 
 async fn listen_for_changes() -> anyhow::Result<()> {
-    // Load the kubeconfig file.
-    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
+    get_pipeline_changes(handle).await?;
 
-    // Create a new client
-    let client = APIClient::new(kubeconfig);
-
-    let pipelines_api = get_pipelines_api();
-
-    // Create our informer and start listening.
-    let informer = Informer::raw(client, pipelines_api)
-        .init()
-        .await?;
-
-    loop {
-        let mut pipeline_events = informer.poll().await?.boxed();
-
-        // Now we just do something each time a new pipeline event is triggered.
-        while let Some(event) = pipeline_events.next().await {
-            handle(event?);
-        }
-    }
+    return Ok(())
 }
 
 fn handle(event: WatchEvent<KubePipeline>) {
