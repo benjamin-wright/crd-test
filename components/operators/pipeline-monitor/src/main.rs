@@ -1,53 +1,18 @@
 #[macro_use]
 extern crate serde_derive;
 
+mod pipelines;
+use pipelines::api::{ get_current_pipelines, get_pipelines_api };
+use pipelines::state::{ KubePipeline };
+
 use serde_json::json;
 
-use std::collections::BTreeMap;
 use futures::{executor, StreamExt};
 use kube::{
-    api::{Api, Informer, Object, RawApi, Void, WatchEvent, Reflector, PostParams},
+    api::{Api, Informer, WatchEvent, PostParams},
     client::APIClient,
     config,
 };
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct SecretKey {
-    pub key: String,
-    pub path: String
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Secret {
-    pub name: String,
-    pub keys: Vec<SecretKey>
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Resource {
-    pub name: String,
-    pub trigger: bool,
-    pub secrets: Vec<Secret>,
-    pub env: BTreeMap<String, String>
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Step {
-    pub name: String,
-    pub resource: Option<String>,
-    pub action: Option<String>,
-    pub path: Option<String>,
-    pub image: Option<String>,
-    pub command: Option<Vec<String>>
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Pipeline {
-    pub resources: Vec<Resource>,
-    pub steps: Vec<Step>
-}
-
-type KubePipeline = Object<Pipeline, Void>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -59,28 +24,8 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn get_pipelines() -> RawApi {
-    return RawApi::customResource("pipelines")
-        .group("minion.ponglehub.com");
-}
-
 async fn prepare_state() -> Result<(), anyhow::Error> {
-    // Load the kubeconfig file.
-    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
-
-    // Create a new client
-    let client = APIClient::new(kubeconfig);
-
-    let pipelines_api = get_pipelines();
-
-    let pipeline_reflector: Reflector<KubePipeline> = Reflector::raw(client, pipelines_api)
-        .timeout(10)
-        .init()
-        .await?;
-
-    pipeline_reflector.poll().await?;
-
-    pipeline_reflector.state().await.into_iter().for_each(|pipelines| {
+    get_current_pipelines().await.into_iter().for_each(|pipelines| {
         for pipeline in &pipelines {
             println!(
                 "Found Pipeline in namespace '{}': {}",
@@ -100,7 +45,7 @@ async fn listen_for_changes() -> anyhow::Result<()> {
     // Create a new client
     let client = APIClient::new(kubeconfig);
 
-    let pipelines_api = get_pipelines();
+    let pipelines_api = get_pipelines_api();
 
     // Create our informer and start listening.
     let informer = Informer::raw(client, pipelines_api)
