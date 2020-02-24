@@ -57,7 +57,3 @@ pub async fn get_pipeline_changes(handler: fn(event: WatchEvent<KubePipeline>)) 
         }
     }
 }
-
-pub async fn get_resource(name: String, namespace: String) {
-
-}

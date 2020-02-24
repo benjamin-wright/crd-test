@@ -2,8 +2,11 @@
 extern crate serde_derive;
 
 mod pipelines;
+mod resources;
+
 use pipelines::api::{ get_current_pipelines, get_pipeline_changes };
 use pipelines::state::{ KubePipeline };
+use resources::api::{ get_resource };
 
 use serde_json::json;
 
@@ -77,10 +80,12 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
     println!("{:?}", pipeline.spec);
 
     for resource in &pipeline.spec.resources {
+        let resource_definition = get_resource(&resource.name).await?;
+
         if !resource.trigger {
             println!(
                 "Found non-triggering resource {} for pipeline '{}': {}",
-                resource.name,
+                resource_definition.spec.image,
                 namespace,
                 pipeline.metadata.name
             );
