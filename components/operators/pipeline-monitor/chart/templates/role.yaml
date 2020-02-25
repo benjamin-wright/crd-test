@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: pipeline-reader
 rules:
-- apiGroups: ["minion.ponglehub.com"] # "" indicates the core API group
+- apiGroups: ["minion.ponglehub.com"]
   resources: ["pipelines", "resources"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["extensions", "apps"]
