@@ -83,23 +83,30 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
                 namespace,
                 pipeline.metadata.name
             );
-            
+
             continue;
         }
-        
+
         println!(
             "Looking up resource '{}': {}",
             namespace,
             pipeline.metadata.name
         );
-        
+
         let resource_definition = get_resource(&resource.name).await?;
-        let deployment_name = format!("{}{}", pipeline.metadata.name, resource_definition.metadata.name);
+        let deployment_name = format!("{}-{}", pipeline.metadata.name, resource_definition.metadata.name);
+
+        println!(
+            "Deploying resource monitor: '{}' ({})",
+            deployment_name,
+            namespace
+        );
 
         deploy_resource_watcher(
             &deployment_name,
             &resource_definition.spec.image,
-            &pipeline.metadata.name
+            &pipeline.metadata.name,
+            namespace
         ).await?;
     }
 

@@ -4,10 +4,11 @@ use anyhow::anyhow;
 use serde_json::json;
 
 use kube::{
-    api::{Api, ListParams, PostParams},
+    api::{Api, ListParams, Object, PostParams},
     client::APIClient,
     config,
 };
+use k8s_openapi::api::apps::v1::{DeploymentSpec, DeploymentStatus};
 
 fn get_resources_api() -> Api<KubeResource> {
     // Load the kubeconfig file.
@@ -20,7 +21,7 @@ fn get_resources_api() -> Api<KubeResource> {
         .group("minion.ponglehub.com");
 }
 
-fn get_deployments_api() -> Api {
+fn get_deployments_api() -> Api<Object<DeploymentSpec, DeploymentStatus>> {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
@@ -44,8 +45,14 @@ pub async fn get_resource(name: &str) -> anyhow::Result<KubeResource> {
     return Err(anyhow!("Failed to find resource: {}", name));
 }
 
-pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str) -> anyhow::Result<()> {
-    let deployments_api = get_deployments_api();
+pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, namespace: &str) -> anyhow::Result<()> {
+    // Load the kubeconfig file.
+    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
+
+    // Create a new client
+    let client = APIClient::new(kubeconfig);
+
+    let deployments_api = Api::v1Deployment(client).within(namespace);
 
     let deployment_manifest = json!({
         "apiVersion": "apps/v1",
@@ -84,5 +91,5 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str) ->
 
     deployments_api.create(&PostParams::default(), serde_json::to_vec(&deployment_manifest)?).await?;
 
-    Ok(());
+    Ok(())
 }
