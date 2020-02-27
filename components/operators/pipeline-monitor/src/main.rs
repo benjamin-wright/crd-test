@@ -6,13 +6,11 @@ mod resources;
 
 use pipelines::api::{ get_current_pipelines, get_pipeline_changes };
 use pipelines::state::{ KubePipeline };
-use resources::api::{ get_resource };
-
-use serde_json::json;
+use resources::api::{ get_resource, deploy_resource_watcher };
 
 use futures::executor;
 use kube::{
-    api::{Api, WatchEvent, PostParams},
+    api::{Api, WatchEvent},
     client::APIClient,
     config,
 };
@@ -77,66 +75,33 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
 
     let deployments = Api::v1Deployment(client).within(namespace);
 
-    println!("{:?}", pipeline.spec);
-
     for resource in &pipeline.spec.resources {
-        let resource_definition = get_resource(&resource.name).await?;
-
         if !resource.trigger {
             println!(
                 "Found non-triggering resource {} for pipeline '{}': {}",
-                resource_definition.spec.image,
+                resource.name,
                 namespace,
                 pipeline.metadata.name
             );
-
+            
             continue;
         }
-
+        
         println!(
             "Looking up resource '{}': {}",
             namespace,
             pipeline.metadata.name
         );
+        
+        let resource_definition = get_resource(&resource.name).await?;
+        let deployment_name = format!("{}{}", pipeline.metadata.name, resource_definition.metadata.name);
+
+        deploy_resource_watcher(
+            &deployment_name,
+            &resource_definition.spec.image,
+            &pipeline.metadata.name
+        ).await?;
     }
-
-    let deployment_name = pipeline.metadata.name.clone() + "-" + "git-resource";
-    let deployment_manifest = json!({
-        "apiVersion": "apps/v1",
-        "kind": "Deployment",
-        "metadata": {
-            "name": deployment_name,
-            "labels": {
-                "pipeline": pipeline.metadata.name,
-                "resource": "resource-name"
-            }
-        },
-        "spec": {
-            "replicas": 1,
-            "selector": {
-                "matchLabels": {
-                    "app": deployment_name
-                }
-            },
-            "template": {
-                "metadata": {
-                    "labels": {
-                        "app": deployment_name
-                    }
-                },
-                "spec": {
-                    "containers": [
-                        {
-                            "name": deployment_name,
-                            "image": "localhost:31500/git-resource"
-                        }
-                    ]
-                }
-            }
-        }
-    });
-
-    deployments.create(&PostParams::default(), serde_json::to_vec(&deployment_manifest)?).await?;
 
     return Ok(());
 }
