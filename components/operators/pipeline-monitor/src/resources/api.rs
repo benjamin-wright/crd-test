@@ -8,7 +8,7 @@ use kube::{
     client::APIClient,
     config,
 };
-use k8s_openapi::api::apps::v1::{DeploymentSpec, DeploymentStatus};
+use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
 
 fn get_resources_api() -> Api<KubeResource> {
     // Load the kubeconfig file.
@@ -21,14 +21,14 @@ fn get_resources_api() -> Api<KubeResource> {
         .group("minion.ponglehub.com");
 }
 
-fn get_deployments_api() -> Api<Object<DeploymentSpec, DeploymentStatus>> {
+fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
     let client = APIClient::new(kubeconfig);
 
-    return Api::v1Deployment(client)
+    return Api::v1beta1CronJob(client)
 }
 
 pub async fn get_resource(name: &str) -> anyhow::Result<KubeResource> {
@@ -46,17 +46,10 @@ pub async fn get_resource(name: &str) -> anyhow::Result<KubeResource> {
 }
 
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, namespace: &str) -> anyhow::Result<()> {
-    // Load the kubeconfig file.
-    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
-
-    // Create a new client
-    let client = APIClient::new(kubeconfig);
-
-    let deployments_api = Api::v1Deployment(client).within(namespace);
-
-    let deployment_manifest = json!({
-        "apiVersion": "apps/v1",
-        "kind": "Deployment",
+    let cron_api = get_cron_api();
+    let job_manifest = json!({
+        "apiVersion": "batch/v1beta1",
+        "kind": "CronJob",
         "metadata": {
             "name": name,
             "labels": {
@@ -65,31 +58,32 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
             }
         },
         "spec": {
-            "replicas": 1,
-            "selector": {
-                "matchLabels": {
-                    "app": name
-                }
-            },
-            "template": {
-                "metadata": {
-                    "labels": {
-                        "app": name
-                    }
-                },
+            "schedule": "* * * * *",
+            "jobTemplate": {
                 "spec": {
-                    "containers": [
-                        {
-                            "name": name,
-                            "image": image
+                    "template": {
+                        "metadata": {
+                            "labels": {
+                                "app": name
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": name,
+                                    "image": image,
+                                    "command": ["./version"]
+                                }
+                            ],
+                            "restartPolicy": "Never"
                         }
-                    ]
+                    }
                 }
             }
         }
     });
 
-    deployments_api.create(&PostParams::default(), serde_json::to_vec(&deployment_manifest)?).await?;
+    cron_api.within(namespace).create(&PostParams::default(), serde_json::to_vec(&job_manifest)?).await?;
 
     Ok(())
 }

@@ -10,9 +10,7 @@ use resources::api::{ get_resource, deploy_resource_watcher };
 
 use futures::executor;
 use kube::{
-    api::{Api, WatchEvent},
-    client::APIClient,
-    config,
+    api::{WatchEvent}
 };
 
 #[tokio::main]
@@ -66,14 +64,6 @@ async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
         namespace,
         pipeline.metadata.name
     );
-
-    // Load the kubeconfig file.
-    let kubeconfig = config::incluster_config().expect("Failed to load kube config");
-
-    // Create a new client
-    let client = APIClient::new(kubeconfig);
-
-    let deployments = Api::v1Deployment(client).within(namespace);
 
     for resource in &pipeline.spec.resources {
         if !resource.trigger {

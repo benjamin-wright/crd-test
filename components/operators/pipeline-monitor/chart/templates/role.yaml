@@ -6,6 +6,6 @@ rules:
 - apiGroups: ["minion.ponglehub.com"]
   resources: ["pipelines", "resources"]
   verbs: ["get", "watch", "list"]
-- apiGroups: ["extensions", "apps"]
-  resources: ["deployments"]
+- apiGroups: ["batch", "extensions"]
+  resources: ["cronjobs"]
   verbs: ["get", "list", "create", "delete"]
