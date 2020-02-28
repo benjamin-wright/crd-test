@@ -3,10 +3,12 @@ extern crate serde_derive;
 
 mod pipelines;
 mod resources;
+mod operations;
 
 use pipelines::api::{ get_current_pipelines, get_pipeline_changes };
 use pipelines::state::{ KubePipeline };
-use resources::api::{ get_resource, deploy_resource_watcher };
+use resources::api::{ get_resource, get_all_resources, deploy_resource_watcher };
+use operations::{ Operations, get_operations };
 
 use futures::executor;
 use kube::{
@@ -23,16 +25,23 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn prepare_state() -> Result<(), anyhow::Error> {
-    get_current_pipelines().await.into_iter().for_each(|pipelines| {
-        for pipeline in &pipelines {
-            println!(
-                "Found Pipeline in namespace '{}': {}",
-                pipeline.metadata.namespace.as_ref().expect("Namespace not defined"),
-                pipeline.metadata.name
-            );
-        }
-    });
+async fn prepare_state() -> anyhow::Result<()> {
+    let pipelines = get_current_pipelines().await?;
+    let resources = get_all_resources().await?;
+
+    let operations = get_operations();
+
+    for resource in &operations.to_add {
+        println!("adding resource: {}", resource.metadata.name);
+    }
+
+    for resource in &operations.to_update {
+        println!("updating resource: {}", resource.metadata.name);
+    }
+
+    for resource in &operations.to_delete {
+        println!("deleting resource: {}", resource.metadata.name);
+    }
 
     return Ok(());
 }
