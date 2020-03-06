@@ -31,9 +31,9 @@ fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
     return Api::v1beta1CronJob(client)
 }
 
-pub async fn get_all_resources() -> anyhow::Result<vec<KubeResource>> {
+pub async fn get_all_resources() -> anyhow::Result<Vec<KubeResource>> {
     let resources_api = get_resources_api();
-    resources_api.list(&ListParams::default()).await?
+    Ok(resources_api.list(&ListParams::default()).await?.items)
 }
 
 pub async fn get_resource(name: &str) -> anyhow::Result<KubeResource> {

@@ -4,6 +4,7 @@ NAMESPACE="crd-test"
 
 function wait-for-kind() {
     local ready="false";
+    echo 'waiting for kind to spin up...';
 
     while [ "$ready" == "false" ]; do
         sleep 0.5;
@@ -33,7 +34,7 @@ wait-for-kind
 devspace use namespace $NAMESPACE
 
 kubectl create namespace infra
-helm dependencies update infrastructure/helm
+helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
 rm -rf .devspace

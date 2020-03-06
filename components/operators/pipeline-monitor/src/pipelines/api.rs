@@ -23,7 +23,7 @@ fn get_pipelines_api() -> RawApi {
         .group("minion.ponglehub.com");
 }
 
-pub async fn get_current_pipelines() -> anyhow::Result<Vec<KubePipeline>> {
+pub async fn get_pipeline_reflector() -> Reflector<KubePipeline> {
     let client = get_api_client();
     let pipelines_api = get_pipelines_api();
 
@@ -31,29 +31,6 @@ pub async fn get_current_pipelines() -> anyhow::Result<Vec<KubePipeline>> {
         .timeout(10)
         .init()
         .await?;
-
-    pipeline_reflector.poll().await?;
-
-    let pipelines = pipeline_reflector.state().await?;
-
-    return Ok(pipelines);
-}
-
-pub async fn get_pipeline_changes(handler: fn(event: WatchEvent<KubePipeline>)) -> anyhow::Result<()> {
-    let client = get_api_client();
-    let pipelines_api = get_pipelines_api();
-
-    // Create our informer and start listening.
-    let informer = Informer::raw(client, pipelines_api)
-        .init()
-        .await?;
-
-    loop {
-        let mut pipeline_events = informer.poll().await?.boxed();
-
-        // Now we just do something each time a new pipeline event is triggered.
-        while let Some(event) = pipeline_events.next().await {
-            handler(event?);
-        }
-    }
+    
+    return pipeline_reflector;
 }
