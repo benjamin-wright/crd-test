@@ -7,7 +7,7 @@ mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ KubePipeline };
-use resources::api::{ get_resource, get_all_resources, deploy_resource_watcher };
+use resources::api::{ get_resource_reflector, get_resource, get_all_resources, deploy_resource_watcher };
 use operations::{ Operations, get_operations };
 
 use futures::executor;
@@ -19,29 +19,46 @@ use kube::{
 async fn main() -> anyhow::Result<()> {
     println!("running");
 
-    loop {
-        let pipeline_reflector = get_pipeline_reflector();
-        
+    let pipeline_reflector = get_pipeline_reflector();
+    let resource_reflector = get_resource_reflector();
+
+    loop {    
         match pipeline_reflector.poll() {
-            Ok(_) -> refresh(pipeline_reflector),
+            Ok(_) -> Ok(),
             Err(err) -> {
-                error!("Failed to refesh cache '{}' - rebooting", err);
+                error!("Failed to refresh pipeline cache '{}' - rebooting", err);
                 std::process::exit(1);
             }
         }
+        
+        match resource_reflector.poll() {
+            Ok(_) -> Ok(),
+            Err(err) -> {
+                error!("Failed to refresh resource cache '{}' - rebooting", err);
+                std::process::exit(1);
+            }
+        }
+
+        let pipelines = pipeline_reflector.state().await?;
+        let resources = resource_reflector.state().await?;
+
+        refresh(pipelines, resources).await?;
     }
 
     Ok(())
 }
 
-async fn refresh(reflector: Reflector<KubePipeline>) {
-    let pipelines = pipeline_reflector.state().await?;
-    let resources = get_all_resources().await?;
-
+async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) {
     let operations = get_operations(pipelines, resources);
 
     for resource in &operations.to_add {
         println!("adding resource: {}", resource.name);
+        deploy_resource_watcher(
+            resource.name,
+            resource.image,
+            resource.pipeline,
+            resource.namespace
+        ).await?;
     }
 
     for resource in &operations.to_update {

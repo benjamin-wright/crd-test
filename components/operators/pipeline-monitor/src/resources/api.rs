@@ -31,6 +31,18 @@ fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
     return Api::v1beta1CronJob(client)
 }
 
+pub async fn get_resource_reflector() -> Reflector<KubeResource> {
+    let client = get_api_client();
+    let resources_api = get_resources_api();
+
+    let resource_reflector: Reflector<KubeResource> = Reflector::raw(client, resources_api)
+        .timeout(10)
+        .init()
+        .await?;
+    
+    return resource_reflector;
+}
+
 pub async fn get_all_resources() -> anyhow::Result<Vec<KubeResource>> {
     let resources_api = get_resources_api();
     Ok(resources_api.list(&ListParams::default()).await?.items)

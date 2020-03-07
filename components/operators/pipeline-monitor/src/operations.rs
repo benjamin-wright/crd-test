@@ -3,7 +3,9 @@ use super::resources::state::{ KubeResource };
 
 pub struct ResourceData {
   pub image: String,
-  pub name: String
+  pub name: String,
+  pub namespace: String,
+  pub pipeline: String
 }
 
 pub struct Operations {
@@ -22,6 +24,55 @@ impl Operations {
   }
 }
 
+fn pick_resource(name: String, resources: Vec<KubeResource>) -> anyhow::Result<KubeResource> {
+  for resource in &resources {
+    if (resource.metadata.name == name) {
+      return Ok(resource);
+    }
+  }
+
+  Err(anyhow!("Failed to find resource: {}", name));
+}
+
 pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) -> Operations {
+  let desired_resources = vec![];
+
+  for pipeline in &pipelines {
+    let namespace = match pipeline.metadata.namespace.as_ref() {
+      Ok(namespace) -> namespace,
+      Err(err) -> {
+        println!("Pipeline '{}' is missing a namespace: {}", pipeline.metadata.name, err);
+        continue;
+      },
+    }
+
+    for resource in &pipeline.spec.resources {
+      if !resource.trigger {
+          println!(
+              "Found non-triggering resource {} for pipeline '{}': {}",
+              resource.name,
+              namespace,
+              pipeline.metadata.name
+          );
+          continue;
+      }
+
+      let resourceDefinition = match pick_resource(resource.name, resources) {
+        Ok(resource) -> resource,
+        Err(err) -> {
+          println!("Failed to find resource {}: {}", resource.name, err);
+          continue;
+        },
+      }
+
+      desired_resource.push(ResourceData {
+        image: resourceDefinition.spec.image,
+        name:,
+        namespace:,
+        pipeline: pipeline.metadata.name,
+      });
+    }
+  }
+  
   Operations::empty()
 }
