@@ -3,6 +3,7 @@ use anyhow::anyhow;
 use super::pipelines::state::{ KubePipeline };
 use super::resources::state::{ KubeResource };
 
+#[derive(Debug)]
 pub struct ResourceData {
   pub image: String,
   pub name: String,
@@ -10,6 +11,7 @@ pub struct ResourceData {
   pub pipeline: String
 }
 
+#[derive(Debug)]
 pub struct Operations {
   pub to_add: Vec<ResourceData>,
   pub to_update: Vec<ResourceData>,
@@ -26,40 +28,40 @@ impl Operations {
   }
 }
 
-fn pick_resource(name: String, resources: Vec<KubeResource>) -> anyhow::Result<KubeResource> {
-  for resource in &resources {
-    if resource.metadata.name == name {
-      return Ok(resource);
+fn pick_resource(name: &String, resources: &Vec<KubeResource>) -> anyhow::Result<KubeResource> {
+  for resource in resources {
+    if &resource.metadata.name == name {
+      return Ok(resource.clone());
     }
   }
 
-  Err(anyhow!("Failed to find resource: {}", name));
+  Err(anyhow!("Failed to find resource: {}", name))
 }
 
-pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) -> Operations {
-  let desired_resources = vec![];
+pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>, crons: Vec<Object<CronJobSpec, CronJobStatus>>) -> Operations {
+  let mut desired_resources = vec![];
 
-  for pipeline in &pipelines {
+  for pipeline in pipelines {
     let namespace = match pipeline.metadata.namespace.as_ref() {
-      Ok(namespace) => namespace,
-      Err(err) => {
-        println!("Pipeline '{}' is missing a namespace: {}", pipeline.metadata.name, err);
+      Some(namespace) => namespace,
+      None => {
+        println!("Pipeline '{}' is missing a namespace", pipeline.metadata.name);
         continue;
       },
     };
 
-    for resource in &pipeline.spec.resources {
+    for resource in pipeline.spec.resources {
       if !resource.trigger {
           println!(
               "Found non-triggering resource {} for pipeline '{}': {}",
               resource.name,
               namespace,
-              pipeline.metadata.name
+              pipeline.metadata.name.clone()
           );
           continue;
       }
 
-      let resource_definition = match pick_resource(resource.name, resources) {
+      let resource_definition = match pick_resource(&resource.name, &resources) {
         Ok(resource) => resource,
         Err(err) => {
           println!("Failed to find resource {}: {}", resource.name, err);
@@ -72,11 +74,13 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
       desired_resources.push(ResourceData {
         image: resource_definition.spec.image,
         name: resource_full_name,
-        namespace: namespace,
-        pipeline: pipeline.metadata.name,
+        namespace: namespace.to_string(),
+        pipeline: pipeline.metadata.name.clone(),
       });
     }
   }
+
+  println!("{:?}", desired_resources);
   
-  desired_resources
+  Operations::empty()
 }

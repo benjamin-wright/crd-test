@@ -10,7 +10,7 @@ mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ KubePipeline };
-use resources::api::{ get_resource_reflector, deploy_resource_watcher };
+use resources::api::{ get_resource_reflector, deploy_resource_watcher, get_resource_watch_reflector };
 use resources::state::{ KubeResource };
 use operations::{ get_operations };
 
@@ -21,9 +21,11 @@ async fn main() -> anyhow::Result<()> {
 
     let pipeline_reflector = get_pipeline_reflector().await?;
     let resource_reflector = get_resource_reflector().await?;
+    let resource_watch_reflector = get_resource_watch_reflector().await?;
 
     let pr_cloned = pipeline_reflector.clone();
     let rr_cloned = resource_reflector.clone();
+    let rw_cloned = resource_watch_reflector.clone();
 
     tokio::spawn(async move {
         loop {
@@ -34,23 +36,26 @@ async fn main() -> anyhow::Result<()> {
             if let Err(e) = rr_cloned.poll().await {
                 println!("Warning: Resource poll error: {:?}", e);
             }
+
+            if let Err(e) = rw_cloned.poll().await {
+                println!("Warning: Resource watch poll error: {:?}", e);
+            }
         }
     });
 
     loop {
         Delay::new(Duration::from_secs(5)).await;
 
-        let pipelines = pipeline_reflector.state().await?.iter().collect::<Vec<_>>();
-        let resources = resource_reflector.state().await?.iter().collect::<Vec<_>>();
+        let pipelines = pipeline_reflector.state().await?.into_iter().collect::<Vec<_>>();
+        let resources = resource_reflector.state().await?.into_iter().collect::<Vec<_>>();
+        let crons = resource_watch_reflector.state().await?.into_iter().collect::<Vec<_>>();
 
-        refresh(pipelines, resources).await?;
+        refresh(pipelines, resources, crons).await?;
     }
-
-    Ok(())
 }
 
-async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) -> anyhow::Result<()> {
-    let operations = get_operations(pipelines, resources);
+async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>, crons: Vec<Object<CronJobSpec, CronJobStatus>>) -> anyhow::Result<()> {
+    let operations = get_operations(pipelines, resources, crons);
 
     for resource in &operations.to_add {
         println!("adding resource: {}", resource.name);

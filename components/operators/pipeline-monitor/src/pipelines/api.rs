@@ -30,5 +30,5 @@ pub async fn get_pipeline_reflector() -> anyhow::Result<Reflector<KubePipeline>>
         .init()
         .await?;
     
-    return pipeline_reflector;
+    return Ok(pipeline_reflector);
 }

@@ -43,7 +43,20 @@ pub async fn get_resource_reflector() -> anyhow::Result<Reflector<KubeResource>>
         .init()
         .await?;
     
-    return resource_reflector;
+    return Ok(resource_reflector);
+}
+
+pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<Object<CronJobSpec, CronJobStatus>>> {
+    let client = get_api_client();
+    let search_params = ListParams::default().labels("minion.ponglehub.co.uk/minion-type=resource-watcher");
+    let cron_resource = Resource::all::<Object<CronJobSpec, CronJobStatus>>();
+
+    let cron_reflector: Reflector<Object<CronJobSpec, CronJobStatus>> = Reflector::new(client, search_params, cron_resource)
+        .timeout(10)
+        .init()
+        .await?;
+
+    return Ok(cron_reflector);
 }
 
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, namespace: &str) -> anyhow::Result<()> {
@@ -55,7 +68,8 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
             "name": name,
             "labels": {
                 "pipeline": pipeline,
-                "resource": "resource-name"
+                "resource": "resource-name",
+                "minion-type": "resource-watcher"
             }
         },
         "spec": {
