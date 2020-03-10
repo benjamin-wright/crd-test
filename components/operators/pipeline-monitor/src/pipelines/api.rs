@@ -21,7 +21,7 @@ fn get_pipelines_api() -> RawApi {
         .group("minion.ponglehub.com");
 }
 
-pub async fn get_pipeline_reflector() -> Reflector<KubePipeline> {
+pub async fn get_pipeline_reflector() -> anyhow::Result<Reflector<KubePipeline>> {
     let client = get_api_client();
     let pipelines_api = get_pipelines_api();
 

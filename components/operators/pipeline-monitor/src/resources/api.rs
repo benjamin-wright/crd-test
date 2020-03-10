@@ -34,7 +34,7 @@ fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
     return Api::v1beta1CronJob(client)
 }
 
-pub async fn get_resource_reflector() -> Reflector<KubeResource> {
+pub async fn get_resource_reflector() -> anyhow::Result<Reflector<KubeResource>> {
     let client = get_api_client();
     let resources_api = get_resources_api();
 

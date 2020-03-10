@@ -1,7 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
 
-use anyhow::anyhow;
+use futures_timer::Delay;
+use std::time::Duration;
 
 mod pipelines;
 mod resources;
@@ -18,28 +19,29 @@ use operations::{ get_operations };
 async fn main() -> anyhow::Result<()> {
     println!("running");
 
-    let pipeline_reflector = get_pipeline_reflector();
-    let resource_reflector = get_resource_reflector();
+    let pipeline_reflector = get_pipeline_reflector().await?;
+    let resource_reflector = get_resource_reflector().await?;
 
-    loop {    
-        match pipeline_reflector.poll() {
-            Ok(_) => Ok(),
-            Err(err) => {
-                anyhow!("Failed to refresh pipeline cache '{}' - rebooting", err);
-                std::process::exit(1);
+    let pr_cloned = pipeline_reflector.clone();
+    let rr_cloned = resource_reflector.clone();
+
+    tokio::spawn(async move {
+        loop {
+            if let Err(e) = pr_cloned.poll().await {
+                println!("Warning: Pipeline poll error: {:?}", e);
+            }
+
+            if let Err(e) = rr_cloned.poll().await {
+                println!("Warning: Resource poll error: {:?}", e);
             }
         }
-        
-        match resource_reflector.poll() {
-            Ok(_) => Ok(),
-            Err(err) => {
-                anyhow!("Failed to refresh resource cache '{}' - rebooting", err);
-                std::process::exit(1);
-            }
-        }
+    });
 
-        let pipelines = pipeline_reflector.state().await?;
-        let resources = resource_reflector.state().await?;
+    loop {
+        Delay::new(Duration::from_secs(5)).await;
+
+        let pipelines = pipeline_reflector.state().await?.iter().collect::<Vec<_>>();
+        let resources = resource_reflector.state().await?.iter().collect::<Vec<_>>();
 
         refresh(pipelines, resources).await?;
     }
@@ -47,16 +49,16 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) {
+async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) -> anyhow::Result<()> {
     let operations = get_operations(pipelines, resources);
 
     for resource in &operations.to_add {
         println!("adding resource: {}", resource.name);
         deploy_resource_watcher(
-            resource.name,
-            resource.image,
-            resource.pipeline,
-            resource.namespace
+            &resource.name,
+            &resource.image,
+            &resource.pipeline,
+            &resource.namespace
         ).await?;
     }
 
@@ -67,6 +69,8 @@ async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>) {
     for resource in &operations.to_remove {
         println!("deleting resource: {}", resource.name);
     }
+
+    Ok(())
 }
 
 // async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
