@@ -1,23 +1,26 @@
 use super::state::KubeResource;
 
-use anyhow::anyhow;
 use serde_json::json;
 
 use kube::{
-    api::{Api, ListParams, Object, PostParams},
+    api::{Api, Object, PostParams, RawApi, Reflector},
     client::APIClient,
     config,
 };
 use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
 
-fn get_resources_api() -> Api<KubeResource> {
+fn get_api_client() -> APIClient {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
     let client = APIClient::new(kubeconfig);
 
-    return Api::customResource(client, "resources")
+    return client;
+}
+
+fn get_resources_api() -> RawApi {
+    return RawApi::customResource("resources")
         .group("minion.ponglehub.com");
 }
 
@@ -41,25 +44,6 @@ pub async fn get_resource_reflector() -> Reflector<KubeResource> {
         .await?;
     
     return resource_reflector;
-}
-
-pub async fn get_all_resources() -> anyhow::Result<Vec<KubeResource>> {
-    let resources_api = get_resources_api();
-    Ok(resources_api.list(&ListParams::default()).await?.items)
-}
-
-pub async fn get_resource(name: &str) -> anyhow::Result<KubeResource> {
-    let resources_api = get_resources_api();
-
-    let resources = resources_api.list(&ListParams::default()).await?;
-
-    for resource in resources {
-        if resource.metadata.name == name {
-            return Ok(resource);
-        }
-    }
-
-    return Err(anyhow!("Failed to find resource: {}", name));
 }
 
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, namespace: &str) -> anyhow::Result<()> {

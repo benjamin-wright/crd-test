@@ -1,19 +1,18 @@
 #[macro_use]
 extern crate serde_derive;
 
+use anyhow::anyhow;
+
 mod pipelines;
 mod resources;
 mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ KubePipeline };
-use resources::api::{ get_resource_reflector, get_resource, get_all_resources, deploy_resource_watcher };
-use operations::{ Operations, get_operations };
+use resources::api::{ get_resource_reflector, deploy_resource_watcher };
+use resources::state::{ KubeResource };
+use operations::{ get_operations };
 
-use futures::executor;
-use kube::{
-    api::{WatchEvent}
-};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -24,17 +23,17 @@ async fn main() -> anyhow::Result<()> {
 
     loop {    
         match pipeline_reflector.poll() {
-            Ok(_) -> Ok(),
-            Err(err) -> {
-                error!("Failed to refresh pipeline cache '{}' - rebooting", err);
+            Ok(_) => Ok(),
+            Err(err) => {
+                anyhow!("Failed to refresh pipeline cache '{}' - rebooting", err);
                 std::process::exit(1);
             }
         }
         
         match resource_reflector.poll() {
-            Ok(_) -> Ok(),
-            Err(err) -> {
-                error!("Failed to refresh resource cache '{}' - rebooting", err);
+            Ok(_) => Ok(),
+            Err(err) => {
+                anyhow!("Failed to refresh resource cache '{}' - rebooting", err);
                 std::process::exit(1);
             }
         }

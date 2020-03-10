@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+
 use super::pipelines::state::{ KubePipeline };
 use super::resources::state::{ KubeResource };
 
@@ -26,7 +28,7 @@ impl Operations {
 
 fn pick_resource(name: String, resources: Vec<KubeResource>) -> anyhow::Result<KubeResource> {
   for resource in &resources {
-    if (resource.metadata.name == name) {
+    if resource.metadata.name == name {
       return Ok(resource);
     }
   }
@@ -39,12 +41,12 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
 
   for pipeline in &pipelines {
     let namespace = match pipeline.metadata.namespace.as_ref() {
-      Ok(namespace) -> namespace,
-      Err(err) -> {
+      Ok(namespace) => namespace,
+      Err(err) => {
         println!("Pipeline '{}' is missing a namespace: {}", pipeline.metadata.name, err);
         continue;
       },
-    }
+    };
 
     for resource in &pipeline.spec.resources {
       if !resource.trigger {
@@ -57,18 +59,18 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
           continue;
       }
 
-      let resourceDefinition = match pick_resource(resource.name, resources) {
-        Ok(resource) -> resource,
-        Err(err) -> {
+      let resource_definition = match pick_resource(resource.name, resources) {
+        Ok(resource) => resource,
+        Err(err) => {
           println!("Failed to find resource {}: {}", resource.name, err);
           continue;
         },
-      }
+      };
 
       let resource_full_name = format!("{}-{}", pipeline.metadata.name, resource_definition.metadata.name);
 
       desired_resources.push(ResourceData {
-        image: resourceDefinition.spec.image,
+        image: resource_definition.spec.image,
         name: resource_full_name,
         namespace: namespace,
         pipeline: pipeline.metadata.name,

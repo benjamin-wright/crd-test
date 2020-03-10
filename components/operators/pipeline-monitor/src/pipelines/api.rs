@@ -1,12 +1,10 @@
 use super::state::KubePipeline;
 
 use kube::{
-    api::{Informer, RawApi, Reflector, WatchEvent},
+    api::{RawApi, Reflector},
     client::APIClient,
     config,
 };
-
-use futures::StreamExt;
 
 fn get_api_client() -> APIClient {
     // Load the kubeconfig file.
