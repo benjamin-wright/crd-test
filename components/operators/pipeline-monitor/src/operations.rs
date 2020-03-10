@@ -65,14 +65,16 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
         },
       }
 
-      desired_resource.push(ResourceData {
+      let resource_full_name = format!("{}-{}", pipeline.metadata.name, resource_definition.metadata.name);
+
+      desired_resources.push(ResourceData {
         image: resourceDefinition.spec.image,
-        name:,
-        namespace:,
+        name: resource_full_name,
+        namespace: namespace,
         pipeline: pipeline.metadata.name,
       });
     }
   }
   
-  Operations::empty()
+  desired_resources
 }
