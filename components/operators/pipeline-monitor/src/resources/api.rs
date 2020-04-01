@@ -3,24 +3,25 @@ use super::state::KubeResource;
 use serde_json::json;
 
 use kube::{
-    api::{Api, Object, PostParams, RawApi, Reflector},
-    client::APIClient,
+    api::{Api, Object, PostParams, Resource, ListParams},
+    Client,
     config,
+    runtime::Reflector
 };
 use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
 
-fn get_api_client() -> APIClient {
+fn get_api_client() -> Client {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = APIClient::new(kubeconfig);
+    let client = Client::new(kubeconfig);
 
     return client;
 }
 
-fn get_resources_api() -> RawApi {
-    return RawApi::customResource("resources")
+fn get_resources_api() -> Resource {
+    return Resource::customResource("resources")
         .group("minion.ponglehub.com");
 }
 
@@ -29,7 +30,7 @@ fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = APIClient::new(kubeconfig);
+    let client = Client::new(kubeconfig);
 
     return Api::v1beta1CronJob(client)
 }
@@ -42,7 +43,7 @@ pub async fn get_resource_reflector() -> anyhow::Result<Reflector<KubeResource>>
         .timeout(10)
         .init()
         .await?;
-    
+
     return Ok(resource_reflector);
 }
 

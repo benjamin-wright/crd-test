@@ -51,8 +51,6 @@ hooks:
         deployments: all
 
 commands:
-- name: deploy
-  command: devspace deploy
 - name: init
   command: ./scripts/start.sh
 - name: clean

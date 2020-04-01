@@ -3,6 +3,9 @@ use anyhow::anyhow;
 use super::pipelines::state::{ KubePipeline };
 use super::resources::state::{ KubeResource };
 
+use kube::api::Object;
+use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
+
 #[derive(Debug)]
 pub struct ResourceData {
   pub image: String,
@@ -81,6 +84,6 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
   }
 
   println!("{:?}", desired_resources);
-  
+
   Operations::empty()
 }

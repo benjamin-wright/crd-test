@@ -14,6 +14,9 @@ use resources::api::{ get_resource_reflector, deploy_resource_watcher, get_resou
 use resources::state::{ KubeResource };
 use operations::{ get_operations };
 
+use kube::api::Object;
+use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
+
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

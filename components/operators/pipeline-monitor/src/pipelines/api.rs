@@ -1,23 +1,24 @@
 use super::state::KubePipeline;
 
 use kube::{
-    api::{RawApi, Reflector},
-    client::APIClient,
+    api::{Resource},
+    Client,
     config,
+    runtime::Reflector
 };
 
-fn get_api_client() -> APIClient {
+fn get_api_client() -> Client {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = APIClient::new(kubeconfig);
+    let client = Client::new(kubeconfig);
 
     return client;
 }
 
-fn get_pipelines_api() -> RawApi {
-    return RawApi::customResource("pipelines")
+fn get_pipelines_api() -> Resource {
+    return Resource::customResource("pipelines")
         .group("minion.ponglehub.com");
 }
 
@@ -29,6 +30,6 @@ pub async fn get_pipeline_reflector() -> anyhow::Result<Reflector<KubePipeline>>
         .timeout(10)
         .init()
         .await?;
-    
+
     return Ok(pipeline_reflector);
 }

@@ -1,0 +1,12 @@
+version: v1beta6
+images:
+  pipeline-monitor:
+    image: localhost:31500/pipeline-monitor
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      image: localhost:31500/pipeline-monitor

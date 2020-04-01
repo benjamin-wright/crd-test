@@ -1,4 +1,4 @@
-use kube::api::{ Object, Void };
+use kube::api::{ Object, NotUsed };
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Resource {
@@ -7,4 +7,4 @@ pub struct Resource {
     pub additional_vars: Vec<String>
 }
 
-pub type KubeResource = Object<Resource, Void>;
+pub type KubeResource = Object<Resource, NotUsed>;
