@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
-use kube::api::{ Object, NotUsed };
+
+#[cfg(k8s_apiextensions = "v1")]
+use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1 as apiextensions;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SecretKey {
@@ -31,16 +33,9 @@ pub struct Step {
     pub command: Option<Vec<String>>
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, k8s_openapi_derive::CustomResourceDefinition)]
-#[custom_resource_definition(
-    group = "minion.ponglehub.com",
-    version = "v1",
-    plural = "pipelines",
-    namespaced,
-)]
+#[derive(CustomResource, Deserialize, Serialize, Clone, Debug)]
+#[kube(group = "minion.ponglehub.com", version = "v1", namespaced)]
 pub struct PipelineSpec {
     pub resources: Vec<Resource>,
     pub steps: Vec<Step>
 }
-
-pub type KubePipeline = Object<PipelineSpec, NotUsed>;

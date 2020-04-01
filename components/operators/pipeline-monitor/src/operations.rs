@@ -1,10 +1,9 @@
 use anyhow::anyhow;
 
-use super::pipelines::state::{ KubePipeline };
-use super::resources::state::{ KubeResource };
+use super::pipelines::state::{ Pipeline };
+use super::resources::state::{ Resource };
 
-use kube::api::Object;
-use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
+use k8s_openapi::api::batch::v1beta1::CronJob;
 
 #[derive(Debug)]
 pub struct ResourceData {
@@ -31,9 +30,10 @@ impl Operations {
   }
 }
 
-fn pick_resource(name: &String, resources: &Vec<KubeResource>) -> anyhow::Result<KubeResource> {
+fn pick_resource(name: &String, resources: &Vec<Resource>) -> anyhow::Result<Resource> {
   for resource in resources {
-    if &resource.metadata.name == name {
+    let resource_name = resource.metadata.name.as_ref().expect("resource missing a name");
+    if resource_name == name {
       return Ok(resource.clone());
     }
   }
@@ -41,25 +41,27 @@ fn pick_resource(name: &String, resources: &Vec<KubeResource>) -> anyhow::Result
   Err(anyhow!("Failed to find resource: {}", name))
 }
 
-pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>, crons: Vec<Object<CronJobSpec, CronJobStatus>>) -> Operations {
+pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, _crons: Vec<CronJob>) -> Operations {
   let mut desired_resources = vec![];
 
   for pipeline in pipelines {
+    let pipeline_name = pipeline.metadata.name.as_ref().expect("pipeline name missing");
     let namespace = match pipeline.metadata.namespace.as_ref() {
       Some(namespace) => namespace,
       None => {
-        println!("Pipeline '{}' is missing a namespace", pipeline.metadata.name);
+        println!("Pipeline '{}' is missing a namespace", pipeline_name);
         continue;
       },
     };
 
     for resource in pipeline.spec.resources {
+
       if !resource.trigger {
           println!(
               "Found non-triggering resource {} for pipeline '{}': {}",
               resource.name,
               namespace,
-              pipeline.metadata.name.clone()
+              pipeline_name
           );
           continue;
       }
@@ -72,13 +74,13 @@ pub fn get_operations(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>
         },
       };
 
-      let resource_full_name = format!("{}-{}", pipeline.metadata.name, resource_definition.metadata.name);
+      let resource_full_name = format!("{}-{}", pipeline_name, resource_definition.metadata.name.as_ref().expect("resource definition name missing"));
 
       desired_resources.push(ResourceData {
         image: resource_definition.spec.image,
         name: resource_full_name,
         namespace: namespace.to_string(),
-        pipeline: pipeline.metadata.name.clone(),
+        pipeline: pipeline_name.to_string(),
       });
     }
   }

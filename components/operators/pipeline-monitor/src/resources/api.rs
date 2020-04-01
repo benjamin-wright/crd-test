@@ -1,59 +1,53 @@
-use super::state::KubeResource;
+use super::state::Resource as MinionResource;
 
 use serde_json::json;
 
 use kube::{
-    api::{Api, Object, PostParams, Resource, ListParams},
+    api::{Api, PostParams, Resource, ListParams},
     Client,
     config,
     runtime::Reflector
 };
-use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
+use k8s_openapi::api::batch::v1beta1::CronJob;
 
 fn get_api_client() -> Client {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = Client::new(kubeconfig);
+    let client = Client::from(kubeconfig);
 
     return client;
 }
 
-fn get_resources_api() -> Resource {
-    return Resource::customResource("resources")
-        .group("minion.ponglehub.com");
-}
-
-fn get_cron_api() -> Api<Object<CronJobSpec, CronJobStatus>> {
+fn get_cron_api(namespace: &str) -> Api<CronJob> {
     // Load the kubeconfig file.
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = Client::new(kubeconfig);
+    let client = Client::from(kubeconfig);
 
-    return Api::v1beta1CronJob(client)
+    return Api::namespaced(client, namespace);
 }
 
-pub async fn get_resource_reflector() -> anyhow::Result<Reflector<KubeResource>> {
+pub async fn get_resource_reflector() -> anyhow::Result<Reflector<MinionResource>> {
     let client = get_api_client();
-    let resources_api = get_resources_api();
+    let search_params = ListParams::default().timeout(10);
+    let resources_resource = Resource::all::<MinionResource>();
 
-    let resource_reflector: Reflector<KubeResource> = Reflector::raw(client, resources_api)
-        .timeout(10)
+    let resource_reflector: Reflector<MinionResource> = Reflector::new(client, search_params, resources_resource)
         .init()
         .await?;
 
     return Ok(resource_reflector);
 }
 
-pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<Object<CronJobSpec, CronJobStatus>>> {
+pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>> {
     let client = get_api_client();
-    let search_params = ListParams::default().labels("minion.ponglehub.co.uk/minion-type=resource-watcher");
-    let cron_resource = Resource::all::<Object<CronJobSpec, CronJobStatus>>();
+    let search_params = ListParams::default().labels("minion.ponglehub.co.uk/minion-type=resource-watcher").timeout(10);
+    let cron_resource = Resource::all::<CronJob>();
 
-    let cron_reflector: Reflector<Object<CronJobSpec, CronJobStatus>> = Reflector::new(client, search_params, cron_resource)
-        .timeout(10)
+    let cron_reflector: Reflector<CronJob> = Reflector::new(client, search_params, cron_resource)
         .init()
         .await?;
 
@@ -61,8 +55,8 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<Object<C
 }
 
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, namespace: &str) -> anyhow::Result<()> {
-    let cron_api = get_cron_api();
-    let job_manifest = json!({
+    let cron_api = get_cron_api(namespace);
+    let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
         "metadata": {
@@ -97,9 +91,9 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
                 }
             }
         }
-    });
+    }))?;
 
-    cron_api.within(namespace).create(&PostParams::default(), serde_json::to_vec(&job_manifest)?).await?;
+    cron_api.create(&PostParams::default(), &cron_job).await?;
 
     Ok(())
 }

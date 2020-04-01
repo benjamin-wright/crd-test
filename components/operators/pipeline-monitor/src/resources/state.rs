@@ -1,10 +1,7 @@
-use kube::api::{ Object, NotUsed };
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Resource {
+#[derive(CustomResource, Deserialize, Serialize, Clone, Debug)]
+#[kube(group = "minion.ponglehub.com", version = "v1", namespaced)]
+pub struct ResourceSpec {
     pub image: String,
     #[serde(rename(serialize = "additionalVars", deserialize = "additionalVars"))]
     pub additional_vars: Vec<String>
 }
-
-pub type KubeResource = Object<Resource, NotUsed>;

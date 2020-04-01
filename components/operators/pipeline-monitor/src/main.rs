@@ -1,5 +1,5 @@
-#[macro_use]
-extern crate serde_derive;
+#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate kube_derive;
 
 use futures_timer::Delay;
 use std::time::Duration;
@@ -9,13 +9,12 @@ mod resources;
 mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
-use pipelines::state::{ KubePipeline };
+use pipelines::state::{ Pipeline };
 use resources::api::{ get_resource_reflector, deploy_resource_watcher, get_resource_watch_reflector };
-use resources::state::{ KubeResource };
+use resources::state::{ Resource };
 use operations::{ get_operations };
 
-use kube::api::Object;
-use k8s_openapi::api::batch::v1beta1::{CronJobSpec, CronJobStatus};
+use k8s_openapi::api::batch::v1beta1::CronJob;
 
 
 #[tokio::main]
@@ -57,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>, crons: Vec<Object<CronJobSpec, CronJobStatus>>) -> anyhow::Result<()> {
+async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<CronJob>) -> anyhow::Result<()> {
     let operations = get_operations(pipelines, resources, crons);
 
     for resource in &operations.to_add {
@@ -81,7 +80,7 @@ async fn refresh(pipelines: Vec<KubePipeline>, resources: Vec<KubeResource>, cro
     Ok(())
 }
 
-// async fn load_pipeline(pipeline: KubePipeline) -> anyhow::Result<()> {
+// async fn load_pipeline(pipeline: PipelineSpec) -> anyhow::Result<()> {
 //     let namespace = pipeline.metadata.namespace.as_ref().expect("Namespace not defined");
 //     println!(
 //         "Added a pipeline to namespace '{}': {}",

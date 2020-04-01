@@ -1,7 +1,7 @@
-use super::state::KubePipeline;
+use super::state::{ Pipeline };
 
 use kube::{
-    api::{Resource},
+    api::{Resource, ListParams},
     Client,
     config,
     runtime::Reflector
@@ -12,22 +12,17 @@ fn get_api_client() -> Client {
     let kubeconfig = config::incluster_config().expect("Failed to load kube config");
 
     // Create a new client
-    let client = Client::new(kubeconfig);
+    let client = Client::from(kubeconfig);
 
     return client;
 }
 
-fn get_pipelines_api() -> Resource {
-    return Resource::customResource("pipelines")
-        .group("minion.ponglehub.com");
-}
-
-pub async fn get_pipeline_reflector() -> anyhow::Result<Reflector<KubePipeline>> {
+pub async fn get_pipeline_reflector() -> anyhow::Result<Reflector<Pipeline>> {
     let client = get_api_client();
-    let pipelines_api = get_pipelines_api();
+    let search_params = ListParams::default().timeout(10);
+    let pipeline_resource = Resource::all::<Pipeline>();
 
-    let pipeline_reflector: Reflector<KubePipeline> = Reflector::raw(client, pipelines_api)
-        .timeout(10)
+    let pipeline_reflector: Reflector<Pipeline> = Reflector::new(client, search_params, pipeline_resource)
         .init()
         .await?;
 
