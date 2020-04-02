@@ -22,10 +22,6 @@ images:
     context: ./components/resources/git-resource
 
 deployments:
-- name: crds
-  helm:
-    chart:
-      name: deployment/crds
 - name: operators
   helm:
     chart:
@@ -55,6 +51,10 @@ commands:
   command: ./scripts/start.sh
 - name: clean
   command: ./scripts/stop.sh
+- name: install-crds
+  command: helm install minion-crds ./deployment/crds
+- name: remove-crds
+  command: helm delete minion-crds
 - name: add-resources
   command: kubectl apply -f tests
 - name: remove-resources

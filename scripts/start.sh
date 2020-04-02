@@ -38,3 +38,5 @@ helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
 rm -rf .devspace
+
+devspace run install-crds

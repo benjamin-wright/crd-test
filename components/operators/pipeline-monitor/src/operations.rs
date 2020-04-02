@@ -85,7 +85,7 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, _crons
     }
   }
 
-  println!("{:?}", desired_resources);
+  println!("Desired resources: {:?}", desired_resources);
 
   Operations::empty()
 }
