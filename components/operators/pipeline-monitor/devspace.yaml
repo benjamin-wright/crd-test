@@ -2,6 +2,12 @@ version: v1beta6
 images:
   pipeline-monitor:
     image: localhost:31500/pipeline-monitor
+    dockerfile: ./code/Dockerfile
+    context: ./code
+  pipeline-monitor-tests:
+    image: localhost:31500/pipeline-monitor-tests
+    dockerfile: ./int-tests/Dockerfile
+    context: ./int-tests
 
 deployments:
 - name: chart
@@ -10,3 +16,15 @@ deployments:
       name: chart
     values:
       image: localhost:31500/pipeline-monitor
+      test:
+        enabled: true
+        image: localhost:31500/pipeline-monitor-tests
+
+profiles:
+- name: dev
+- name: prod
+  patches:
+  - op: remove
+    path: images.pipeline-monitor-tests
+  - op: remove
+    path: deployments[0].helm.values.test

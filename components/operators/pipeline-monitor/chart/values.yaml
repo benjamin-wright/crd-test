@@ -4,3 +4,7 @@ resources:
   limits:
     cpu: 100m
     memory: 64Mi
+
+test:
+  enabled: false
+  image: localhost/pipeline-monitor-tests

@@ -3,3 +3,4 @@ target
 
 # Ignore DevSpace cache and log folder
 .devspace/
+node_modules

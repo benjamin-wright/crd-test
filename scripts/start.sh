@@ -31,12 +31,13 @@ kind create --config infrastructure/kind-config.yaml cluster --name $CLUSTER_NAM
 
 wait-for-kind
 
+kubectl create namespace $NAMESPACE
 devspace use namespace $NAMESPACE
 
 kubectl create namespace infra
 helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
-rm -rf .devspace
+rm -rf ./**/.devspace
 
 devspace run install-crds
