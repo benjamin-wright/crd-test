@@ -93,7 +93,15 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
         }
     }))?;
 
-    cron_api.create(&PostParams::default(), &cron_job).await?;
-
-    Ok(())
+    match cron_api.create(&PostParams::default(), &cron_job).await {
+        Ok(_o) => return Ok(()),
+        Err(kube::Error::Api(ae)) => {
+            if ae.code != 409 {
+                return Err(ae.into());
+            }
+            println!("cron {} already exists", name)
+            return Ok(())
+        },
+        Err(err) => return Err(err.into())
+    }
 }
