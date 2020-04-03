@@ -38,6 +38,7 @@ kubectl create namespace infra
 helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
-rm -rf ./**/.devspace
+echo "cleaning out old files"
+rm -r ./**/.devspace
 
 devspace run install-crds

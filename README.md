@@ -169,3 +169,21 @@ graph LR;
     TaskImage --> TaskVolume;
   end
 ```
+
+## Development
+
+The main access point for development is `devspace`
+
+ - Run `devspace init` to create a new `kind` kubernetes cluster, bootstrap the basic infrastructure and deploy the CRDs
+ - Run `devspace clean` to tear everything down
+
+### Basic project structure:
+
+| Directory        | Contents                                                                |
+| ---              | ---                                                                     |
+| `/infrastructure`| Helm charts and configs for setting up the underlying infrastructure    |
+| `/deployment`    | Helm charts for deployment of the entire solution                       |
+| `/scripts`       | Automation scripts and helpers for use in devspace commands             |
+| `/aliases`       | Helper commands designed to be executed within component directories    |
+| `/tests`         | Some example resources that can be `kubectl apply`ed for manual testing |
+| `/components`    | Source code for all the docker images                                   |

@@ -3,5 +3,5 @@
 pub struct ResourceSpec {
     pub image: String,
     #[serde(rename(serialize = "additionalVars", deserialize = "additionalVars"))]
-    pub additional_vars: Vec<String>
+    pub additional_vars: Option<Vec<String>>
 }

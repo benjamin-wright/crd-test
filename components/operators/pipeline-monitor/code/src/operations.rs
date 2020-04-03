@@ -20,16 +20,6 @@ pub struct Operations {
   pub to_remove: Vec<ResourceData>
 }
 
-impl Operations {
-  pub fn empty() -> Operations {
-    Operations {
-      to_add: vec![],
-      to_update: vec![],
-      to_remove: vec![]
-    }
-  }
-}
-
 fn pick_resource(name: &String, resources: &Vec<Resource>) -> anyhow::Result<Resource> {
   for resource in resources {
     let resource_name = resource.metadata.name.as_ref().expect("resource missing a name");
@@ -41,7 +31,7 @@ fn pick_resource(name: &String, resources: &Vec<Resource>) -> anyhow::Result<Res
   Err(anyhow!("Failed to find resource: {}", name))
 }
 
-pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, _crons: Vec<CronJob>) -> Operations {
+fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> anyhow::Result<Vec<ResourceData>> {
   let mut desired_resources = vec![];
 
   for pipeline in pipelines {
@@ -85,7 +75,62 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, _crons
     }
   }
 
-  println!("Desired resources: {:?}", desired_resources);
+  return Ok(desired_resources);
+}
 
-  Operations::empty()
+pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<CronJob>) -> Operations {
+  let desired_resources = match get_desired_resources(pipelines, resources) {
+    Ok(resources) => resources,
+    Err(err) => {
+      println!("Failed to find desired resources: ${:?}", err);
+      vec![]
+    }
+  };
+
+  let mut to_add = vec![];
+
+  for resource in desired_resources {
+    let mut unmonitored = true;
+
+    for cron in &crons {
+      let metadata = match &cron.metadata {
+        Some(metadata) => metadata,
+        None => {
+          println!("Found cron without metadata");
+          continue;
+        }
+      };
+
+      let name = match &metadata.name {
+        Some(name) => name,
+        None => {
+          println!("Found cron without name");
+          continue;
+        }
+      };
+
+      let namespace = match &metadata.namespace {
+        Some(namespace) => namespace,
+        None => {
+          println!("Found cron without namespace");
+          continue;
+        }
+      };
+
+      if &resource.name == name && &resource.namespace == namespace {
+        println!("resource {} is already monitored", resource.name);
+        unmonitored = false;
+      }
+    }
+
+    if unmonitored {
+      to_add.push(resource);
+    }
+  }
+
+  Operations {
+    to_add,
+    to_update: vec![],
+    to_remove: vec![]
+  }
 }

@@ -10,6 +10,7 @@ describe('I\'m a test!', () => {
     });
 
     it('should work!', async () => {
+        await apiHelper.addResource('git-resource');
         await apiHelper.addPipeline('pipeline');
 
         await wait.forSuccess(async () => {

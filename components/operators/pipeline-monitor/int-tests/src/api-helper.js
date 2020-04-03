@@ -23,37 +23,52 @@ class ApiHelper {
         return result.body.items;
     }
 
+    async addResource(name) {
+        const resource = {
+            apiVersion: 'minion.ponglehub.com/v1',
+            kind: 'Resource',
+            metadata: {
+                name
+            },
+            spec: {
+                image: 'localhost/my-image'
+            }
+        }
+
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body: resource });
+    }
+
     async addPipeline(name) {
         const pipeline = {
-            apiVersion: "minion.ponglehub.com/v1",
-            kind: "Pipeline",
+            apiVersion: 'minion.ponglehub.com/v1',
+            kind: 'Pipeline',
             metadata: {
                 name
             },
             spec: {
                 resources: [
                     {
-                        name: "git-resource",
+                        name: 'git-resource',
                         trigger: true,
                         secrets: [
                             {
-                                name: "my-confg",
+                                name: 'my-confg',
                                 keys: [
-                                    { key: "id-rsa.pub", path: "/root/.ssh" }
+                                    { key: 'id-rsa.pub', path: '/root/.ssh' }
                                 ]
                             }
                         ],
                         env: {
-                            REPO: "git@github.com:username/repo.git"
+                            REPO: 'git@github.com:username/repo.git'
                         }
                     }
                 ],
                 steps: [
                     {
-                        name: "Load source",
-                        resource: "my-resource",
-                        action: "GET",
-                        path: "some/sub/path"
+                        name: 'Load source',
+                        resource: 'my-resource',
+                        action: 'GET',
+                        path: 'some/sub/path'
                     }
                 ]
             }

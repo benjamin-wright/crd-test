@@ -34,11 +34,19 @@ async fn main() -> anyhow::Result<()> {
             if let Err(e) = pr_cloned.poll().await {
                 println!("Warning: Pipeline poll error: {:?}", e);
             }
+        }
+    });
 
+    tokio::spawn(async move {
+        loop {
             if let Err(e) = rr_cloned.poll().await {
                 println!("Warning: Resource poll error: {:?}", e);
             }
+        }
+    });
 
+    tokio::spawn(async move {
+        loop {
             if let Err(e) = rw_cloned.poll().await {
                 println!("Warning: Resource watch poll error: {:?}", e);
             }
@@ -46,12 +54,11 @@ async fn main() -> anyhow::Result<()> {
     });
 
     loop {
-        Delay::new(Duration::from_secs(5)).await;
-
         let pipelines = pipeline_reflector.state().await?.into_iter().collect::<Vec<_>>();
         let resources = resource_reflector.state().await?.into_iter().collect::<Vec<_>>();
         let crons = resource_watch_reflector.state().await?.into_iter().collect::<Vec<_>>();
 
+        Delay::new(Duration::from_secs(5)).await;
         refresh(pipelines, resources, crons).await?;
     }
 }
@@ -79,49 +86,3 @@ async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<
 
     Ok(())
 }
-
-// async fn load_pipeline(pipeline: PipelineSpec) -> anyhow::Result<()> {
-//     let namespace = pipeline.metadata.namespace.as_ref().expect("Namespace not defined");
-//     println!(
-//         "Added a pipeline to namespace '{}': {}",
-//         namespace,
-//         pipeline.metadata.name
-//     );
-
-//     for resource in &pipeline.spec.resources {
-//         if !resource.trigger {
-//             println!(
-//                 "Found non-triggering resource {} for pipeline '{}': {}",
-//                 resource.name,
-//                 namespace,
-//                 pipeline.metadata.name
-//             );
-
-//             continue;
-//         }
-
-//         println!(
-//             "Looking up resource '{}': {}",
-//             namespace,
-//             pipeline.metadata.name
-//         );
-
-//         let resource_definition = get_resource(&resource.name).await?;
-//         let deployment_name = format!("{}-{}", pipeline.metadata.name, resource_definition.metadata.name);
-
-//         println!(
-//             "Deploying resource monitor: '{}' ({})",
-//             deployment_name,
-//             namespace
-//         );
-
-//         deploy_resource_watcher(
-//             &deployment_name,
-//             &resource_definition.spec.image,
-//             &pipeline.metadata.name,
-//             namespace
-//         ).await?;
-//     }
-
-//     return Ok(());
-// }

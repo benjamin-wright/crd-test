@@ -1,0 +1,123 @@
+#!/bin/bash
+
+set -o errexit -o pipefail
+
+export TIMEOUT=120
+
+
+#######################
+#       HELPERS       #
+#######################
+
+
+function get-num-jobs() {
+    kubectl get job -o json | jq '.items | length' -r
+}
+
+function get-job-name() {
+    kubectl get job -o json | jq '.items[0].metadata.name' -r
+}
+
+function wait-for-job() {
+    local job_name=$1
+    local timeout=$TIMEOUT
+    local start=$(date +%s)
+
+    echo "Waiting for job $job_name to finish...";
+    local succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
+    local failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
+
+    while [[ true ]]; do
+        sleep 0.25
+
+        succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
+        failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
+
+        if [[ "$succeeded" == 1 || "$failed" == 1 ]]; then
+            break
+        fi
+
+        local elapsed=$(expr $(date +%s) - $start)
+        if [[ $elapsed -gt $timeout ]]; then
+            echo "Timed out"
+            exit 1
+        fi
+    done
+}
+
+function get-pods-for-job() {
+    local job_name=$1
+
+    kubectl get pods -l job-name=$job_name -o json | jq '.items[].metadata.name' -r
+}
+
+function get-deployment-name() {
+    kubectl get deployment -o json | jq '.items[0].metadata.name' -r
+}
+
+function get-pods-for-deployment() {
+    local deployment_name=$1
+
+    kubectl get pods -o json | jq ".items[] | select(.metadata.name | contains(\"$deployment_name\")) | .metadata.name" -r
+}
+
+function get-containers-for-pod() {
+    local pod_name=$1
+
+    kubectl get pod $pod -o json | jq '.spec | select(.containers != null) | .containers[].name' -r
+    kubectl get pod $pod -o json | jq '.spec | select(.initContainers != null) | .initContainers[].name' -r
+}
+
+function get-logs-for-pods() {
+    local pods=$1
+
+    for pod in $pods; do
+    echo "Pod: $pod"
+
+    containers=$(get-containers-for-pod $pod)
+    for container in $containers; do
+        echo " - $container"
+        echo "$(get-logs-for-container $pod $container)"
+    done
+done
+}
+
+function get-logs-for-container() {
+    local pod_name=$1
+    local container_name=$2
+
+    kubectl logs $pod_name $container_name
+}
+
+
+########################
+#      RUN THINGS      #
+########################
+
+devspace deploy --build-sequential
+
+num_jobs=$(get-num-jobs)
+
+if [ "$num_jobs" != "1" ]; then
+    echo "Wrong number of job candidates: $num_jobs"
+    exit 1
+fi
+
+job_name=$(get-job-name)
+wait-for-job $job_name
+
+echo ""
+echo "**** Deployment Logs ****"
+echo ""
+
+deployment_name=$(get-deployment-name)
+pods=$(get-pods-for-deployment $deployment_name)
+get-logs-for-pods "$pods"
+
+
+echo ""
+echo "**** Test Job Logs ****"
+echo ""
+
+pods=$(get-pods-for-job $job_name)
+get-logs-for-pods "$pods"

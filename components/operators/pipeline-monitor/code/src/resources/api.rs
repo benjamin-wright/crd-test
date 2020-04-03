@@ -64,7 +64,7 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
             "labels": {
                 "pipeline": pipeline,
                 "resource": "resource-name",
-                "minion-type": "resource-watcher"
+                "minion.ponglehub.co.uk/minion-type": "resource-watcher"
             }
         },
         "spec": {
