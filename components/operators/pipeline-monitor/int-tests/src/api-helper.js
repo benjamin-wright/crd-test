@@ -3,18 +3,32 @@ const Client = require('kubernetes-client').Client;
 const Request = require('kubernetes-client/backends/request');
 
 class ApiHelper {
-    constructor() {
-        const backend = new Request(Request.config.getInCluster());
-        this.client = new Client({ backend }).loadSpec();
+    constructor(namespace = 'default') {
+        this.backend = new Request(Request.config.getInCluster());
+        this.namespace = namespace;
     }
 
-    async addPipeline(name, namespace) {
-        const pipeline = JSON.stringify({
-            apiVersion: "v1",
+    async init() {
+        this.client = new Client({ backend: this.backend });
+        await this.client.loadSpec();
+    }
+
+    async getCronJobs() {
+        const result = await this.client.apis.batch.v1beta1.namespaces(this.namespace).cronjobs.get();
+
+        if (result.statusCode !== 200)
+
+        throw new Error(`Failed to fetch cronJobs: ${result.statusCode}`);
+
+        return result.body.items;
+    }
+
+    async addPipeline(name) {
+        const pipeline = {
+            apiVersion: "minion.ponglehub.com/v1",
             kind: "Pipeline",
             metadata: {
-                name,
-                namespace
+                name
             },
             spec: {
                 resources: [
@@ -43,9 +57,9 @@ class ApiHelper {
                     }
                 ]
             }
-        });
+        };
 
-        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(namespace).pipelines.post({ body: pipeline });
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines.post({ body: pipeline });
     }
 }
 

@@ -2,16 +2,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Release.Name }}-credentials-test"
+  name: "pipeline-monitor-test-{{ .Release.Revision }}"
 spec:
+  backoffLimit: 0
   template:
     spec:
+      serviceAccount: pipeline-monitor-test
       containers:
       - name: test
         image: {{ .Values.test.image }}
         env:
         - name: TEST_NAMESPACE
-          value: {{ .Release.Name }}-{{ .Release.Revision }}
+          value: "pipeline-monitor-test-{{ .Release.Revision }}"
         command: ["npm", "test"]
       restartPolicy: Never
 {{- end -}}
