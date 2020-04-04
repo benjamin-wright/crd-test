@@ -10,7 +10,7 @@ mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ Pipeline };
-use resources::api::{ get_resource_reflector, deploy_resource_watcher, get_resource_watch_reflector };
+use resources::api::{ get_resource_reflector, deploy_resource_watcher, remove_resource_watcher, get_resource_watch_reflector };
 use resources::state::{ Resource };
 use operations::{ get_operations };
 
@@ -73,6 +73,7 @@ async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<
             &resource.name,
             &resource.image,
             &resource.pipeline,
+            &resource.resource,
             &resource.namespace
         ).await?;
     }
@@ -82,7 +83,8 @@ async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<
     }
 
     for resource in &operations.to_remove {
-        println!("deleting resource: {}", resource.name);
+        println!("removing resource: {}", resource.name);
+        remove_resource_watcher(&resource.name, &resource.namespace).await?;
     }
 
     Ok(())

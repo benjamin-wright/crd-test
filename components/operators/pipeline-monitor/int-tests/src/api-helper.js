@@ -1,6 +1,7 @@
 
 const Client = require('kubernetes-client').Client;
 const Request = require('kubernetes-client/backends/request');
+const templates = require('./templates');
 
 class ApiHelper {
     constructor(namespace = 'default') {
@@ -11,6 +12,16 @@ class ApiHelper {
     async init() {
         this.client = new Client({ backend: this.backend });
         await this.client.loadSpec();
+    }
+
+    async getCronJob(name) {
+        const result = await this.client.apis.batch.v1beta1.namespaces(this.namespace).cronjobs(name).get()
+
+        if (result.statusCode !== 200)
+
+        throw new Error(`Failed to fetch cronJob: ${result.statusCode}`);
+
+        return result.body;
     }
 
     async getCronJobs() {
@@ -24,57 +35,25 @@ class ApiHelper {
     }
 
     async addResource(name) {
-        const resource = {
-            apiVersion: 'minion.ponglehub.com/v1',
-            kind: 'Resource',
-            metadata: {
-                name
-            },
-            spec: {
-                image: 'localhost/my-image'
-            }
-        }
+        const resource = templates.resource(name);
 
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body: resource });
     }
 
-    async addPipeline(name) {
-        const pipeline = {
-            apiVersion: 'minion.ponglehub.com/v1',
-            kind: 'Pipeline',
-            metadata: {
-                name
-            },
-            spec: {
-                resources: [
-                    {
-                        name: 'git-resource',
-                        trigger: true,
-                        secrets: [
-                            {
-                                name: 'my-confg',
-                                keys: [
-                                    { key: 'id-rsa.pub', path: '/root/.ssh' }
-                                ]
-                            }
-                        ],
-                        env: {
-                            REPO: 'git@github.com:username/repo.git'
-                        }
-                    }
-                ],
-                steps: [
-                    {
-                        name: 'Load source',
-                        resource: 'my-resource',
-                        action: 'GET',
-                        path: 'some/sub/path'
-                    }
-                ]
-            }
-        };
+    async addPipeline(name, resource) {
+        const pipeline = templates.pipeline(name, resource);
 
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines.post({ body: pipeline });
+    }
+
+    async deletePipeline(name) {
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines(name).delete();
+    }
+
+    async addCronJob(name, pipeline, resource) {
+        const cronjob = templates.cronJob(name, pipeline, resource);
+
+        return await this.client.apis.batch.v1beta1.namespaces(this.namespace).cronjobs.post({ body: cronjob });
     }
 }
 
