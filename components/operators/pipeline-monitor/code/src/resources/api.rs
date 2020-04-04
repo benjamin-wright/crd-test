@@ -99,7 +99,7 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, na
             if ae.code != 409 {
                 return Err(ae.into());
             }
-            println!("cron {} already exists", name)
+            println!("resource monitor {} already exists", name);
             return Ok(())
         },
         Err(err) => return Err(err.into())
