@@ -57,10 +57,10 @@ async fn main() -> anyhow::Result<()> {
         let pipelines = pipeline_reflector.state().await?.into_iter().collect::<Vec<_>>();
         let resources = resource_reflector.state().await?.into_iter().collect::<Vec<_>>();
         let crons = resource_watch_reflector.state().await?.into_iter().collect::<Vec<_>>();
-        
+
         refresh(pipelines, resources, crons).await?;
 
-        Delay::new(Duration::from_secs(5)).await;
+        Delay::new(Duration::from_secs(15)).await;
     }
 }
 

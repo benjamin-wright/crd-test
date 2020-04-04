@@ -39,6 +39,6 @@ helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
 echo "cleaning out old files"
-rm -r ./**/.devspace
+rm -r $(pwd)/**/.devspace
 
 devspace run install-crds

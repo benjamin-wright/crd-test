@@ -177,6 +177,8 @@ The main access point for development is `devspace`
  - Run `devspace init` to create a new `kind` kubernetes cluster, bootstrap the basic infrastructure and deploy the CRDs
  - Run `devspace clean` to tear everything down
 
+Within individual projects in the `/components` directory, `run-test` is a utility to make running integration tests easier
+
 ### Basic project structure:
 
 | Directory        | Contents                                                                |
