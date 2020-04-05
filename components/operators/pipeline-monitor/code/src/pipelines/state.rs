@@ -1,23 +1,7 @@
-use std::collections::BTreeMap;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct SecretKey {
-    pub key: String,
-    pub path: String
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Secret {
-    pub name: String,
-    pub keys: Vec<SecretKey>
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Resource {
     pub name: String,
-    pub trigger: bool,
-    pub secrets: Vec<Secret>,
-    pub env: BTreeMap<String, String>
+    pub trigger: bool
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

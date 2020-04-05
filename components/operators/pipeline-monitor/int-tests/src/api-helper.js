@@ -34,10 +34,10 @@ class ApiHelper {
         return result.body.items;
     }
 
-    async addResource(name) {
-        const resource = templates.resource(name);
+    async addResource({ resource, image }) {
+        const body = templates.resource({ resource, image: image || 'localhost/my-image' });
 
-        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body: resource });
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body });
     }
 
     async addPipeline({ pipeline, resource, trigger }) {
@@ -50,8 +50,8 @@ class ApiHelper {
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines(name).delete();
     }
 
-    async addCronJob(name, pipeline, resource) {
-        const cronjob = templates.cronJob(name, pipeline, resource);
+    async addCronJob(name, pipeline, resource, image) {
+        const cronjob = templates.cronJob(name, pipeline, resource, image);
 
         return await this.client.apis.batch.v1beta1.namespaces(this.namespace).cronjobs.post({ body: cronjob });
     }

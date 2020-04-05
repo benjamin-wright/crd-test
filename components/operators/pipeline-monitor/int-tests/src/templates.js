@@ -4,15 +4,26 @@ module.exports = {
     cronJob
 }
 
-function resource(name) {
+function resource({ resource, image }) {
     return {
         apiVersion: 'minion.ponglehub.com/v1',
         kind: 'Resource',
         metadata: {
-            name
+            name: resource
         },
         spec: {
-            image: 'localhost/my-image'
+            image,
+            secrets: [
+                {
+                    name: 'my-confg',
+                    keys: [
+                        { key: 'id-rsa.pub', path: '/root/.ssh' }
+                    ]
+                }
+            ],
+            env: {
+                REPO: 'git@github.com:username/repo.git'
+            }
         }
     };
 }
@@ -28,18 +39,7 @@ function pipeline({ pipeline, resource, trigger }) {
             resources: [
                 {
                     name: resource,
-                    trigger,
-                    secrets: [
-                        {
-                            name: 'my-confg',
-                            keys: [
-                                { key: 'id-rsa.pub', path: '/root/.ssh' }
-                            ]
-                        }
-                    ],
-                    env: {
-                        REPO: 'git@github.com:username/repo.git'
-                    }
+                    trigger
                 }
             ],
             steps: [
@@ -54,12 +54,12 @@ function pipeline({ pipeline, resource, trigger }) {
     };
 }
 
-function cronJob(name, pipeline, resource) {
+function cronJob(name, pipeline, resource, image) {
     return {
         apiVersion: "batch/v1beta1",
         kind: "CronJob",
         metadata: {
-            name: name,
+            name,
             labels: {
                 pipeline,
                 resource,
@@ -68,7 +68,7 @@ function cronJob(name, pipeline, resource) {
             annotations: {
                 "minion.ponglehub.co.uk/pipeline": pipeline,
                 "minion.ponglehub.co.uk/resource": resource,
-                "minion.ponglehub.co.uk/image": "localhost/some-image",
+                "minion.ponglehub.co.uk/image": image,
                 "minion.ponglehub.co.uk/minion-type": "resource-watcher",
             }
         },
@@ -85,8 +85,8 @@ function cronJob(name, pipeline, resource) {
                         spec: {
                             containers: [
                                 {
-                                    name: name,
-                                    image: "localhost/some-image",
+                                    name,
+                                    image,
                                     command: ["./version"]
                                 }
                             ],

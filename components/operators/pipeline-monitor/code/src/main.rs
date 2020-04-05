@@ -61,7 +61,9 @@ async fn main() -> anyhow::Result<()> {
             let resources = resource_reflector.state().await?.into_iter().collect::<Vec<_>>();
             let crons = resource_watch_reflector.state().await?.into_iter().collect::<Vec<_>>();
 
-            refresh(pipelines, resources, crons).await?;
+            if let Err(e) = refresh(pipelines, resources, crons).await {
+                println!("Warning: Error refreshing: {:?}", e);
+            }
 
             Delay::new(Duration::from_secs(15)).await;
         }
