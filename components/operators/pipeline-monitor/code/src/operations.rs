@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use std::fmt;
 
 use super::pipelines::state::{ Pipeline };
 use super::resources::state::{ Resource };
@@ -12,6 +13,12 @@ pub struct ResourceData {
   pub resource: String,
   pub namespace: String,
   pub pipeline: String
+}
+
+impl fmt::Display for ResourceData {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{} [ns: {}, img: {}, pl: {}]", self.name, self.namespace, self.image, self.pipeline)
+  }
 }
 
 #[derive(Debug)]
@@ -165,7 +172,6 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons:
       let pipelines_match = &resource.pipeline == &current.pipeline;
 
       if exists && pipelines_match {
-        println!("resource {} is already monitored", resource.name);
         monitored = true;
         break;
       }

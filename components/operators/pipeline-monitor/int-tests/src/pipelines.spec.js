@@ -28,7 +28,7 @@ describe('I\'m a test!', () => {
         await wait.forSuccess(async () => await apiHelper.getCronJob(`${pipeline}-${resource}`));
         await apiHelper.deletePipeline(pipeline);
         await wait.forSuccess(async () => {
-            await expect(apiHelper.getCronJob(`${pipeline}-${resource}`)).rejects.toEqual({});
+            await expect(apiHelper.getCronJob(`${pipeline}-${resource}`)).rejects.toEqual(new Error('cronjobs.batch "pipeline-2-git-resource-2" not found'));
         });
     }, TIMEOUT);
 });
