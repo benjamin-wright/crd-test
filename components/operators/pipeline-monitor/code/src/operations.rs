@@ -1,8 +1,9 @@
 use anyhow::anyhow;
 use std::fmt;
+use std::collections::BTreeMap;
 
 use super::pipelines::state::{ Pipeline };
-use super::resources::state::{ Resource };
+use super::resources::state::{ Resource, Secret };
 
 use k8s_openapi::api::batch::v1beta1::CronJob;
 
@@ -12,7 +13,9 @@ pub struct ResourceData {
   pub name: String,
   pub resource: String,
   pub namespace: String,
-  pub pipeline: String
+  pub pipeline: String,
+  pub env: BTreeMap<String, String>,
+  pub secrets: Vec<Secret>
 }
 
 impl fmt::Display for ResourceData {
@@ -72,7 +75,9 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
         name: resource_full_name,
         resource: resource_definition.metadata.name.as_ref().expect("resource definition name missing").to_string(),
         namespace: namespace.to_string(),
-        pipeline: pipeline_name.to_string()
+        pipeline: pipeline_name.to_string(),
+        env: resource_definition.spec.env,
+        secrets: resource_definition.spec.secrets
       });
     }
   }
@@ -145,7 +150,9 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       name: name.to_string(),
       resource: resource.to_string(),
       namespace: namespace.to_string(),
-      pipeline: pipeline.to_string()
+      pipeline: pipeline.to_string(),
+      env: BTreeMap::new(),
+      secrets: vec![]
     });
   }
 

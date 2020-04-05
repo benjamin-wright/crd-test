@@ -1,6 +1,8 @@
 use super::state::Resource as MinionResource;
 
 use serde_json::json;
+use std::collections::{ BTreeMap };
+use std::iter::{ Map };
 
 use kube::{
     api::{Api, DeleteParams, PostParams, Resource, ListParams},
@@ -54,7 +56,7 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>
     return Ok(cron_reflector);
 }
 
-pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str) -> anyhow::Result<()> {
+pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &BTreeMap<String, String>) -> anyhow::Result<()> {
     let cron_api = get_cron_api(namespace);
     let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
@@ -88,7 +90,8 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
                                 {
                                     "name": name,
                                     "image": image,
-                                    "command": ["./version"]
+                                    "command": ["./version"],
+                                    "env": env.iter().map(|(&key, &value)| (key, value)).collect::<Map<String,String>>()
                                 }
                             ],
                             "restartPolicy": "Never"

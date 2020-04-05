@@ -97,7 +97,8 @@ async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<
             &resource.image,
             &resource.pipeline,
             &resource.resource,
-            &resource.namespace
+            &resource.namespace,
+            &resource.env
         ).await?;
     }
 
