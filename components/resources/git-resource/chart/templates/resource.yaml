@@ -4,7 +4,10 @@ metadata:
   name: {{ .Values.name }}
 spec:
   image: {{ .Values.image }}
-  additionalVars:
-  - REPO
-  - BRANCH
-  - SSH_KEY
+  secrets:
+  - name: my-config
+    keys:
+    - key: id-rsa.pub
+      path: /root/.ssh
+  env:
+    REPO: git@github.com:username/repo.git

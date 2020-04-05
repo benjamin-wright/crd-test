@@ -17,10 +17,24 @@ spec:
               properties:
                 image:
                   type: string
-                additionalVars:
+                env:
+                  type: object
+                secrets:
                   type: array
                   items:
-                    type: string
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      keys:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                            path:
+                              type: string
   scope: Namespaced
   names:
     plural: resources

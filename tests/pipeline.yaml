@@ -6,13 +6,6 @@ spec:
   resources:
   - name: git-resource
     trigger: true
-    secrets:
-    - name: my-config
-      keys:
-      - key: id-rsa.pub
-        path: /root/.ssh
-    env:
-      REPO: git@github.com:username/repo.git
   steps:
   - name: Load source
     resource: my-resource

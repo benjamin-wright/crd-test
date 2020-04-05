@@ -31,9 +31,13 @@ metadata:
   name: my-resource
 spec:
   image: docker.io/resource-checker
-  additionalVars:
-  - REPO
-  - etc...
+  env:
+    REPO: git@github.com:username/repo.git
+  secrets:
+  - name: my-config
+    keys:
+    - key: id-rsa.pub
+      path: /root/.ssh
 ```
 
 > NB: Should try to implement `git` and `docker` resource types.
@@ -49,13 +53,6 @@ spec:
   resources:
   - name: my-resource
     trigger: true
-    secrets:
-    - name: my-config
-      keys:
-      - key: id-rsa.pub
-        path: /root/.ssh
-    env:
-      REPO: git@github.com:username/repo.git
   steps:
   - name: Load source          # Resource step schema
     resource: my-resource

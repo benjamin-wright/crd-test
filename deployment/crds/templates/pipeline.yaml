@@ -24,24 +24,6 @@ spec:
                         type: string
                       trigger:
                         type: boolean
-                      secrets:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            keys:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  key:
-                                    type: string
-                                  path:
-                                    type: string
-                      env:
-                        type: object
                 steps:
                   type: array
                   items:
