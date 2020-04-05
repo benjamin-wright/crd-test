@@ -40,10 +40,10 @@ class ApiHelper {
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body: resource });
     }
 
-    async addPipeline(name, resource) {
-        const pipeline = templates.pipeline(name, resource);
+    async addPipeline({ pipeline, resource, trigger }) {
+        const body = templates.pipeline({ pipeline, resource, trigger });
 
-        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines.post({ body: pipeline });
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).pipelines.post({ body });
     }
 
     async deletePipeline(name) {

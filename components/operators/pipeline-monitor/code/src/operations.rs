@@ -53,14 +53,7 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
     };
 
     for resource in pipeline.spec.resources {
-
       if !resource.trigger {
-          println!(
-              "Found non-triggering resource {} for pipeline '{}': {}",
-              resource.name,
-              namespace,
-              pipeline_name
-          );
           continue;
       }
 
@@ -79,7 +72,7 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
         name: resource_full_name,
         resource: resource_definition.metadata.name.as_ref().expect("resource definition name missing").to_string(),
         namespace: namespace.to_string(),
-        pipeline: pipeline_name.to_string(),
+        pipeline: pipeline_name.to_string()
       });
     }
   }

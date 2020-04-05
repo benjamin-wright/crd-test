@@ -17,18 +17,18 @@ function resource(name) {
     };
 }
 
-function pipeline(name, resourceName) {
+function pipeline({ pipeline, resource, trigger }) {
     return {
         apiVersion: 'minion.ponglehub.com/v1',
         kind: 'Pipeline',
         metadata: {
-            name
+            name: pipeline
         },
         spec: {
             resources: [
                 {
-                    name: resourceName,
-                    trigger: true,
+                    name: resource,
+                    trigger,
                     secrets: [
                         {
                             name: 'my-confg',

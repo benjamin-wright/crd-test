@@ -9,9 +9,12 @@ function wait(timeout = DEFAULT_POLLING_PERIOD) {
     return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
-async function forSuccess(test, timeout = DEFAULT_TIMEOUT) {
+async function forSuccess(test, delay = 0, timeout = DEFAULT_TIMEOUT) {
     let running = true;
     let lastError = null;
+
+    await wait(delay);
+
     const timer = setTimeout(() => running = false, timeout);
 
     while (running) {
