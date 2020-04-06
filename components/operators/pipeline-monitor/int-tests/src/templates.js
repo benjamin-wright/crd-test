@@ -21,9 +21,9 @@ function resource({ resource, image }) {
                     ]
                 }
             ],
-            env: {
-                REPO: 'git@github.com:username/repo.git'
-            }
+            env: [
+                { name: 'REPO', value: 'git@github.com:username/repo.git' }
+            ]
         }
     };
 }

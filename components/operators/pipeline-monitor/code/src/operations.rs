@@ -1,9 +1,8 @@
 use anyhow::anyhow;
 use std::fmt;
-use std::collections::BTreeMap;
 
 use super::pipelines::state::{ Pipeline };
-use super::resources::state::{ Resource, Secret };
+use super::resources::state::{ Resource, Secret, EnvVar };
 
 use k8s_openapi::api::batch::v1beta1::CronJob;
 
@@ -14,7 +13,7 @@ pub struct ResourceData {
   pub resource: String,
   pub namespace: String,
   pub pipeline: String,
-  pub env: BTreeMap<String, String>,
+  pub env: Vec<EnvVar>,
   pub secrets: Vec<Secret>
 }
 
@@ -151,7 +150,7 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       resource: resource.to_string(),
       namespace: namespace.to_string(),
       pipeline: pipeline.to_string(),
-      env: BTreeMap::new(),
+      env: vec![],
       secrets: vec![]
     });
   }

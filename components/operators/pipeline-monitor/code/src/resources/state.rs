@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SecretKey {
     pub key: String,
@@ -14,7 +12,7 @@ pub struct Secret {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EnvVar {
-    pub key: String,
+    pub name: String,
     pub value: String
 }
 
