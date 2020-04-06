@@ -37,6 +37,8 @@ class ApiHelper {
     async addResource({ resource, image }) {
         const body = templates.resource({ resource, image: image || 'localhost/my-image' });
 
+        console.log(body);
+
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body });
     }
 

@@ -12,10 +12,16 @@ pub struct Secret {
     pub keys: Vec<SecretKey>
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct EnvVar {
+    pub key: String,
+    pub value: String
+}
+
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug)]
 #[kube(group = "minion.ponglehub.com", version = "v1", namespaced)]
 pub struct ResourceSpec {
     pub image: String,
     pub secrets: Vec<Secret>,
-    pub env: BTreeMap<String, String>
+    pub env: Vec<EnvVar>
 }

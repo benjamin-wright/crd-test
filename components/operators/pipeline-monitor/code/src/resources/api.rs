@@ -2,7 +2,6 @@ use super::state::Resource as MinionResource;
 
 use serde_json::json;
 use std::collections::{ BTreeMap };
-use std::iter::{ Map };
 
 use kube::{
     api::{Api, DeleteParams, PostParams, Resource, ListParams},
@@ -11,6 +10,7 @@ use kube::{
     runtime::Reflector
 };
 use k8s_openapi::api::batch::v1beta1::CronJob;
+use k8s_openapi::api::core::v1::EnvVar;
 
 fn get_api_client() -> Client {
     // Load the kubeconfig file.
@@ -58,6 +58,12 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>
 
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &BTreeMap<String, String>) -> anyhow::Result<()> {
     let cron_api = get_cron_api(namespace);
+    let mut environment = vec![];
+
+    for (key, value) in env {
+        environment.push(EnvVar { name: key.to_string(), value: Some(value.to_string()), value_from: None });
+    }
+
     let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
@@ -91,7 +97,7 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
                                     "name": name,
                                     "image": image,
                                     "command": ["./version"],
-                                    "env": env.iter().map(|(&key, &value)| (key, value)).collect::<Map<String,String>>()
+                                    "env": environment
                                 }
                             ],
                             "restartPolicy": "Never"
