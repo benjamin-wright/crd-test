@@ -1,4 +1,4 @@
-const DEFAULT_TIMEOUT = 20000;
+const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_POLLING_PERIOD = 250;
 
 module.exports = {

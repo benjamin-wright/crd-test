@@ -1,7 +1,8 @@
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SecretKey {
     pub key: String,
-    pub path: String
+    pub path: String,
+    pub mountPath: String
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

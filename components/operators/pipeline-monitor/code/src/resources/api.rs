@@ -1,4 +1,4 @@
-use super::state::{ Resource as MinionResource, EnvVar };
+use super::state::{ Resource as MinionResource, EnvVar, Secret };
 
 use serde_json::json;
 
@@ -54,7 +54,7 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>
     return Ok(cron_reflector);
 }
 
-pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>) -> anyhow::Result<()> {
+pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>) -> anyhow::Result<()> {
     let cron_api = get_cron_api(namespace);
 
     let cron_job: CronJob = serde_json::from_value(json!({
@@ -72,6 +72,8 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
                 "minion.ponglehub.co.uk/resource": resource,
                 "minion.ponglehub.co.uk/image": image,
                 "minion.ponglehub.co.uk/minion-type": "resource-watcher",
+                "minion.ponglehub.co.uk/env": json!(env).to_string(),
+                "minion.ponglehub.co.uk/secrets": json!(secrets).to_string()
             }
         },
         "spec": {
