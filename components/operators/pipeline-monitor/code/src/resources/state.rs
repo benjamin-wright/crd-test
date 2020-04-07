@@ -1,13 +1,14 @@
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SecretKey {
     pub key: String,
-    pub path: String,
-    pub mountPath: String
+    pub path: String
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Secret {
     pub name: String,
+    #[serde(rename(serialize = "mount_path", deserialize = "mountPath"))]
+    pub mount_path: String,
     pub keys: Vec<SecretKey>
 }
 

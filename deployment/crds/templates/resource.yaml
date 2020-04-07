@@ -33,6 +33,8 @@ spec:
                     properties:
                       name:
                         type: string
+                      mountPath:
+                        type: string
                       keys:
                         type: array
                         items:

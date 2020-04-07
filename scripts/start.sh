@@ -39,6 +39,7 @@ helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
 echo "cleaning out old files"
-rm -r $(pwd)/**/.devspace
+rm -r .devspace
+rm -r components/operators/pipeline-monitor/.devspace
 
 devspace run install-crds
