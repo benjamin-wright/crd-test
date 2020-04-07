@@ -8,4 +8,4 @@ rules:
   verbs: ["get", "watch", "list"]
 - apiGroups: ["batch", "extensions"]
   resources: ["cronjobs"]
-  verbs: ["get", "list", "create", "delete"]
+  verbs: ["get", "list", "create", "update", "delete"]

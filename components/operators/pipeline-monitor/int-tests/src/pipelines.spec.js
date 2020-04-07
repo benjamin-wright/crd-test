@@ -96,5 +96,42 @@ describe('Pipeline Monitor', () => {
                 await expect(apiHelper.getCronJob(`${pipeline}-${resource}`)).rejects.toEqual(new Error(`cronjobs.batch "${pipeline}-${resource}" not found`));
             });
         }, TIMEOUT);
+
+        it('should update the resource watcher when the resource is updated', async () => {
+            const newSecret = {
+                name: 'new-config',
+                mountPath: '/new-root/.ssh',
+                keys: [
+                    { key: 'new-rsa.pub', path: 'new-rsa.pub' }
+                ]
+            };
+            await apiHelper.updateResource({resource, image, secret: newSecret});
+
+            await wait.forSuccess(async () => {
+                await apiHelper.getCronJob(`${pipeline}-${resource}`)
+
+                const cronJob = await apiHelper.getCronJob(`${pipeline}-${resource}`);
+                const expectedVolumeMounts = [
+                    {
+                        name: 'my-config',
+                        mountPath: '/root/.ssh',
+                        readOnly: true
+                    }
+                ];
+                const expectedVolume = {
+                    name: 'my-config',
+                    secret: {
+                        defaultMode: 420,
+                        secretName: 'my-config',
+                        items: [
+                            { key: 'id-rsa.pub', path: 'id-rsa.pub' }
+                        ]
+                    }
+                };
+
+                expect(manifestHelper.getCronContainers(cronJob).map(c => c.volumeMounts)).toEqual([ expectedVolumeMounts ]);
+                expect(cronJob.spec.jobTemplate.spec.template.spec.volumes).toEqual([ expectedVolume ]);
+            });
+        }, TIMEOUT);
     });
 });

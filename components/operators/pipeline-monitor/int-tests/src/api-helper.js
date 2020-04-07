@@ -40,6 +40,29 @@ class ApiHelper {
         return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources.post({ body });
     }
 
+    async getResource(name) {
+        const result = await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources(name).get();
+
+        if (result.statusCode !== 200)
+
+        throw new Error(`Failed to fetch resource: ${result.statusCode}`);
+
+        return result.body;
+    }
+
+    async updateResource({ resource, image, secret }) {
+        const body = templates.resource({
+            resource,
+            image: image || 'localhost/my-image',
+            secret
+        });
+
+        const previous = await this.getResource(resource);
+        body.metadata.resourceVersion = previous.metadata.resourceVersion;
+
+        return await this.client.apis['minion.ponglehub.com'].v1.namespaces(this.namespace).resources(resource).put({ body });
+    }
+
     async addPipeline({ pipeline, resource, trigger }) {
         const body = templates.pipeline({ pipeline, resource, trigger });
 

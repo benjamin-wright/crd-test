@@ -4,7 +4,15 @@ module.exports = {
     cronJob
 }
 
-function resource({ resource, image }) {
+function resource({ resource, image, secret }) {
+    const defaultSecret = {
+        name: 'my-config',
+        mountPath: '/root/.ssh',
+        keys: [
+            { key: 'id-rsa.pub', path: 'id-rsa.pub' }
+        ]
+    };
+
     return {
         apiVersion: 'minion.ponglehub.com/v1',
         kind: 'Resource',
@@ -14,13 +22,7 @@ function resource({ resource, image }) {
         spec: {
             image,
             secrets: [
-                {
-                    name: 'my-config',
-                    mountPath: '/root/.ssh',
-                    keys: [
-                        { key: 'id-rsa.pub', path: 'id-rsa.pub' }
-                    ]
-                }
+                ...(secret ? [ secret ] : [ defaultSecret ])
             ],
             env: [
                 { name: 'REPO', value: 'git@github.com:username/repo.git' }
