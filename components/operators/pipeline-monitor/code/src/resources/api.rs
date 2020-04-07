@@ -1,6 +1,6 @@
 use super::state::{ Resource as MinionResource, EnvVar, Secret };
 
-use serde_json::json;
+use serde_json::{Value, Map, json};
 
 use kube::{
     api::{Api, DeleteParams, PostParams, Resource, ListParams},
@@ -57,6 +57,35 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>
 pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>) -> anyhow::Result<()> {
     let cron_api = get_cron_api(namespace);
 
+    let mut secret_mounts = vec![];
+    let mut volumes = vec![];
+
+    for secret in secrets {
+        let mut secret_mount = Map::new();
+        secret_mount.insert("name".to_string(), Value::String(secret.name.to_string()));
+        secret_mount.insert("mountPath".to_string(), Value::String(secret.mount_path.to_string()));
+        secret_mount.insert("readOnly".to_string(), Value::Bool(true));
+
+        let mut items = vec![];
+        for key_value_pair in &secret.keys {
+            let mut key = Map::new();
+            key.insert("key".to_string(), Value::String(key_value_pair.key.to_string()));
+            key.insert("path".to_string(), Value::String(key_value_pair.path.to_string()));
+            items.push(Value::Object(key));
+        }
+
+        let mut secret_hash = Map::new();
+        secret_hash.insert("secretName".to_string(), Value::String(secret.name.to_string()));
+        secret_hash.insert("items".to_string(), Value::Array(items));
+
+        let mut volume = Map::new();
+        volume.insert("name".to_string(), Value::String(secret.name.to_string()));
+        volume.insert("secret".to_string(), Value::Object(secret_hash));
+
+        secret_mounts.push(secret_mount);
+        volumes.push(volume);
+    }
+
     let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
@@ -78,6 +107,7 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
         },
         "spec": {
             "schedule": "* * * * *",
+            "concurrencyPolicy": "Forbid",
             "jobTemplate": {
                 "spec": {
                     "template": {
@@ -92,9 +122,11 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
                                     "name": name,
                                     "image": image,
                                     "command": ["./version"],
-                                    "env": env
+                                    "env": env,
+                                    "volumeMounts": secret_mounts
                                 }
                             ],
+                            "volumes": volumes,
                             "restartPolicy": "Never"
                         }
                     }

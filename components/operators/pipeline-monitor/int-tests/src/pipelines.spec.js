@@ -51,25 +51,24 @@ describe('Pipeline Monitor', () => {
                 {
                     name: 'my-config',
                     mountPath: '/root/.ssh',
-                    readonly: true
+                    readOnly: true
                 }
             ];
-            const expectedVolumes = [
-                {
-                    name: 'my-config',
-                    secret: {
-                        secretName: 'my-config',
-                        items: [
-                            { key: 'id-rsa.pub', path: '/root/.ssh' }
-                        ]
-                    }
+            const expectedVolume = {
+                name: 'my-config',
+                secret: {
+                    defaultMode: 420,
+                    secretName: 'my-config',
+                    items: [
+                        { key: 'id-rsa.pub', path: 'id-rsa.pub' }
+                    ]
                 }
-            ];
+            };
 
             expect(manifestHelper.getCronContainers(cronJob).map(c => c.image)).toEqual([ image ]);
             expect(manifestHelper.getCronContainers(cronJob).map(c => c.env)).toEqual([ expectedEnvironment ]);
             expect(manifestHelper.getCronContainers(cronJob).map(c => c.volumeMounts)).toEqual([ expectedVolumeMounts ]);
-            expect(cronJob.spec.jobTemplate.spec.template.volumes).toEqual([ expectedVolumes ]);
+            expect(cronJob.spec.jobTemplate.spec.template.spec.volumes).toEqual([ expectedVolume ]);
         }, TIMEOUT);
 
         it('should not add a cronjob to monitor a non-triggering resource for a pipeline', async () => {

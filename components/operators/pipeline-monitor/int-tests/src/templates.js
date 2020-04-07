@@ -15,7 +15,7 @@ function resource({ resource, image }) {
             image,
             secrets: [
                 {
-                    name: 'my-confg',
+                    name: 'my-config',
                     mountPath: '/root/.ssh',
                     keys: [
                         { key: 'id-rsa.pub', path: 'id-rsa.pub' }
