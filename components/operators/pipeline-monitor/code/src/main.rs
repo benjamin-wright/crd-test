@@ -9,12 +9,14 @@ use signal_hook::{iterator::Signals, SIGINT, SIGTERM};
 
 mod pipelines;
 mod resources;
+mod resource_watcher;
 mod operations;
 
 use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ Pipeline };
-use resources::api::{ get_resource_reflector, deploy_resource_watcher, remove_resource_watcher, get_resource_watch_reflector };
+use resources::api::{ get_resource_reflector };
 use resources::state::{ Resource };
+use resource_watcher::api::{ get_resource_watch_reflector, deploy_resource_watcher, remove_resource_watcher };
 use operations::{ get_operations };
 
 use k8s_openapi::api::batch::v1beta1::CronJob;
@@ -57,9 +59,36 @@ async fn main() -> anyhow::Result<()> {
 
     tokio::spawn(async move {
         loop {
-            let pipelines = pipeline_reflector.state().await?.into_iter().collect::<Vec<_>>();
-            let resources = resource_reflector.state().await?.into_iter().collect::<Vec<_>>();
-            let crons = resource_watch_reflector.state().await?.into_iter().collect::<Vec<_>>();
+            let pipeline_state = match pipeline_reflector.state().await {
+                Ok(state) => state,
+                Err(err) => {
+                    println!("ERROR - Failed to fetch pipeline state: {:?}", err);
+                    Delay::new(Duration::from_secs(15)).await;
+                    continue;
+                }
+            };
+
+            let resource_state = match resource_reflector.state().await {
+                Ok(state) => state,
+                Err(err) => {
+                    println!("ERROR - Failed to fetch resource state: {:?}", err);
+                    Delay::new(Duration::from_secs(15)).await;
+                    continue;
+                }
+            };
+
+            let cron_state = match resource_watch_reflector.state().await {
+                Ok(state) => state,
+                Err(err) => {
+                    println!("ERROR - Failed to fetch resource watcher state: {:?}", err);
+                    Delay::new(Duration::from_secs(15)).await;
+                    continue;
+                }
+            };
+
+            let pipelines = pipeline_state.into_iter().collect::<Vec<Pipeline>>();
+            let resources = resource_state.into_iter().collect::<Vec<Resource>>();
+            let crons = cron_state.into_iter().collect::<Vec<CronJob>>();
 
             if let Err(e) = refresh(pipelines, resources, crons).await {
                 println!("Warning: Error refreshing: {:?}", e);

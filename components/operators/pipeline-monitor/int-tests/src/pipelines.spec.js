@@ -113,18 +113,18 @@ describe('Pipeline Monitor', () => {
                 const cronJob = await apiHelper.getCronJob(`${pipeline}-${resource}`);
                 const expectedVolumeMounts = [
                     {
-                        name: 'my-config',
+                        name: 'new-config',
                         mountPath: '/root/.ssh',
                         readOnly: true
                     }
                 ];
                 const expectedVolume = {
-                    name: 'my-config',
+                    name: 'new-config',
                     secret: {
                         defaultMode: 420,
-                        secretName: 'my-config',
+                        secretName: 'new-config',
                         items: [
-                            { key: 'id-rsa.pub', path: 'id-rsa.pub' }
+                            { key: 'new-rsa.pub', path: 'new-rsa.pub' }
                         ]
                     }
                 };

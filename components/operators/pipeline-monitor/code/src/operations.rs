@@ -32,7 +32,14 @@ pub struct Operations {
 
 fn pick_resource(name: &String, resources: &Vec<Resource>) -> anyhow::Result<Resource> {
   for resource in resources {
-    let resource_name = resource.metadata.name.as_ref().expect("resource missing a name");
+    let resource_name = match resource.metadata.name.as_ref() {
+      Some(name) => name,
+      None => {
+        println!("Resource missing a name in pick_resource");
+        continue;
+      }
+    };
+
     if resource_name == name {
       return Ok(resource.clone());
     }
@@ -45,7 +52,14 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
   let mut desired_resources = vec![];
 
   for pipeline in pipelines {
-    let pipeline_name = pipeline.metadata.name.as_ref().expect("pipeline name missing");
+    let pipeline_name = match pipeline.metadata.name.as_ref() {
+      Some(name) => name,
+      None => {
+        println!("pipeline is missing a name");
+        continue;
+      }
+    };
+
     let namespace = match pipeline.metadata.namespace.as_ref() {
       Some(namespace) => namespace,
       None => {
@@ -67,12 +81,20 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
         },
       };
 
-      let resource_full_name = format!("{}-{}", pipeline_name, resource_definition.metadata.name.as_ref().expect("resource definition name missing"));
+      let resource_name = match resource_definition.metadata.name.as_ref() {
+        Some(name) => name,
+        None => {
+          println!("Resource definition name missing for {}", resource.name);
+          continue;
+        }
+      };
+
+      let resource_full_name = format!("{}-{}", pipeline_name, resource_name);
 
       desired_resources.push(ResourceData {
         image: resource_definition.spec.image,
         name: resource_full_name,
-        resource: resource_definition.metadata.name.as_ref().expect("resource definition name missing").to_string(),
+        resource: resource_name.to_string(),
         namespace: namespace.to_string(),
         pipeline: pipeline_name.to_string(),
         env: resource_definition.spec.env,
@@ -144,6 +166,22 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       }
     };
 
+    let secrets: Vec<Secret> = match annotations.get("minion.ponglehub.co.uk/secrets") {
+      Some(secrets_string) => {
+        match serde_json::from_str(secrets_string) {
+          Ok(secrets) => secrets,
+          Err(e) => {
+            println!("Error deserialising secrets string: {:?}", e);
+            continue;
+          }
+        }
+      }
+      None => {
+        println!("Cron doesn't have a secrets annotation");
+        continue;
+      }
+    };
+
     current_resources.push(ResourceData {
       image: image.to_string(),
       name: name.to_string(),
@@ -151,7 +189,7 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       namespace: namespace.to_string(),
       pipeline: pipeline.to_string(),
       env: vec![],
-      secrets: vec![]
+      secrets: secrets
     });
   }
 
@@ -163,25 +201,33 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons:
   let current_resources = get_current_resources(crons);
 
   let mut to_add = vec![];
+  let mut to_update = vec![];
+
   for resource in &desired_resources {
-    let mut monitored = false;
+    let mut add = true;
 
     for current in &current_resources {
-      let exists = &resource.name == &current.name && &resource.namespace == &current.namespace;
-      let pipelines_match = &resource.pipeline == &current.pipeline;
-
-      if exists && pipelines_match {
-        monitored = true;
-        break;
+      if &resource.name != &current.name || &resource.namespace != &current.namespace {
+        continue;
       }
 
-      if exists && !pipelines_match {
+      add = false;
+
+      if &resource.pipeline != &current.pipeline {
         println!("resource monitor name {} already in use!", resource.name);
         break;
       }
+
+      if &resource.secrets != &current.secrets {
+        println!("{:?} to {:?}", &current.secrets, &resource.secrets);
+        to_update.push(resource.clone());
+        break;
+      }
+
+      break;
     }
 
-    if !monitored {
+    if add {
       to_add.push(resource.clone());
     }
   }
@@ -205,7 +251,7 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons:
 
   Operations {
     to_add,
-    to_update: vec![],
+    to_update,
     to_remove
   }
 }

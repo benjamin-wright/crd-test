@@ -73,6 +73,8 @@ function cronJob(name, pipeline, resource, image) {
                 "minion.ponglehub.co.uk/resource": resource,
                 "minion.ponglehub.co.uk/image": image,
                 "minion.ponglehub.co.uk/minion-type": "resource-watcher",
+                "minion.ponglehub.co.uk/secrets": "[]",
+                "minion.ponglehub.co.uk/env": "[]"
             }
         },
         spec: {
