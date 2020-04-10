@@ -16,7 +16,7 @@ use pipelines::api::{ get_pipeline_reflector };
 use pipelines::state::{ Pipeline };
 use resources::api::{ get_resource_reflector };
 use resources::state::{ Resource };
-use resource_watcher::api::{ get_resource_watch_reflector, deploy_resource_watcher, remove_resource_watcher };
+use resource_watcher::api::{ get_resource_watch_reflector, deploy_resource_watcher, remove_resource_watcher, update_resource_watcher };
 use operations::{ get_operations };
 
 use k8s_openapi::api::batch::v1beta1::CronJob;
@@ -128,12 +128,23 @@ async fn refresh(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons: Vec<
             &resource.resource,
             &resource.namespace,
             &resource.env,
-            &resource.secrets
+            &resource.secrets,
+            &resource.resource_version
         ).await?;
     }
 
     for resource in &operations.to_update {
         println!("updating resource: {}", resource);
+        update_resource_watcher(
+            &resource.name,
+            &resource.image,
+            &resource.pipeline,
+            &resource.resource,
+            &resource.namespace,
+            &resource.env,
+            &resource.secrets,
+            &resource.resource_version
+        ).await?;
     }
 
     for resource in &operations.to_remove {

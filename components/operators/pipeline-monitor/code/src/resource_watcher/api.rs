@@ -91,7 +91,8 @@ struct ResourceWatcherParams<'a> {
     env: &'a Vec<EnvVar>,
     secrets: &'a Vec<Secret>,
     volumes: &'a Vec<Map<String, Value>>,
-    volume_mounts: &'a Vec<Map<String, Value>>
+    volume_mounts: &'a Vec<Map<String, Value>>,
+    resource_version: &'a str
 }
 
 fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<CronJob> {
@@ -100,6 +101,7 @@ fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<C
         "kind": "CronJob",
         "metadata": {
             "name": params.name,
+            "resourceVersion": params.resource_version,
             "labels": {
                 "pipeline": params.pipeline,
                 "resource": params.resource,
@@ -147,7 +149,7 @@ fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<C
     return Ok(cron_job);
 }
 
-pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>) -> anyhow::Result<()> {
+pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>, resource_version: &str) -> anyhow::Result<()> {
     let cron_api = get_cron_api(namespace);
 
     let volumes = make_volumes(secrets);
@@ -161,10 +163,42 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
         env: &env,
         secrets: &secrets,
         volumes: &volumes,
-        volume_mounts: &volume_mounts
+        volume_mounts: &volume_mounts,
+        resource_version
     })?;
 
     match cron_api.create(&PostParams::default(), &cron_job).await {
+        Ok(_o) => return Ok(()),
+        Err(kube::Error::Api(ae)) => {
+            if ae.code != 409 {
+                return Err(ae.into());
+            }
+            println!("resource monitor {} already exists", name);
+            return Ok(())
+        },
+        Err(err) => return Err(err.into())
+    }
+}
+
+pub async fn update_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>, resource_version: &str) -> anyhow::Result<()> {
+    let cron_api = get_cron_api(namespace);
+
+    let volumes = make_volumes(secrets);
+    let volume_mounts = make_volume_mounts(secrets);
+
+    let cron_job = get_resource_watcher_body(&ResourceWatcherParams {
+        name,
+        image,
+        pipeline,
+        resource,
+        env: &env,
+        secrets: &secrets,
+        volumes: &volumes,
+        volume_mounts: &volume_mounts,
+        resource_version
+    })?;
+
+    match cron_api.replace(name, &PostParams::default(), &cron_job).await {
         Ok(_o) => return Ok(()),
         Err(kube::Error::Api(ae)) => {
             if ae.code != 409 {

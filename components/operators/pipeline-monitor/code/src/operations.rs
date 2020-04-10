@@ -5,6 +5,7 @@ use super::pipelines::state::{ Pipeline };
 use super::resources::state::{ Resource, Secret, EnvVar };
 
 use k8s_openapi::api::batch::v1beta1::CronJob;
+use kube::api::Meta;
 
 #[derive(Debug, Clone)]
 pub struct ResourceData {
@@ -14,7 +15,8 @@ pub struct ResourceData {
   pub namespace: String,
   pub pipeline: String,
   pub env: Vec<EnvVar>,
-  pub secrets: Vec<Secret>
+  pub secrets: Vec<Secret>,
+  pub resource_version: String
 }
 
 impl fmt::Display for ResourceData {
@@ -98,7 +100,8 @@ fn get_desired_resources(pipelines: Vec<Pipeline>, resources: Vec<Resource>) -> 
         namespace: namespace.to_string(),
         pipeline: pipeline_name.to_string(),
         env: resource_definition.spec.env,
-        secrets: resource_definition.spec.secrets
+        secrets: resource_definition.spec.secrets,
+        resource_version: String::from("0")
       });
     }
   }
@@ -189,7 +192,8 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       namespace: namespace.to_string(),
       pipeline: pipeline.to_string(),
       env: vec![],
-      secrets: secrets
+      secrets: secrets,
+      resource_version: Meta::resource_ver(cron).unwrap_or(String::from("0"))
     });
   }
 
@@ -219,8 +223,9 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons:
       }
 
       if &resource.secrets != &current.secrets {
-        println!("{:?} to {:?}", &current.secrets, &resource.secrets);
-        to_update.push(resource.clone());
+        let mut new_resource = resource.clone();
+        new_resource.resource_version = current.resource_version.to_string();
+        to_update.push(new_resource);
         break;
       }
 

@@ -114,7 +114,7 @@ describe('Pipeline Monitor', () => {
                 const expectedVolumeMounts = [
                     {
                         name: 'new-config',
-                        mountPath: '/root/.ssh',
+                        mountPath: '/new-root/.ssh',
                         readOnly: true
                     }
                 ];
