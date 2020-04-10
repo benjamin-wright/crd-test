@@ -185,13 +185,29 @@ fn get_current_resources(crons: Vec<CronJob>) -> Vec<ResourceData> {
       }
     };
 
+    let env: Vec<EnvVar> = match annotations.get("minion.ponglehub.co.uk/env") {
+      Some(env_string) => {
+        match serde_json::from_str(env_string) {
+          Ok(env) => env,
+          Err(e) => {
+            println!("Error deserialising environment string: {:?}", e);
+            continue;
+          }
+        }
+      }
+      None => {
+        println!("Cron doesn't have an env annotation");
+        continue;
+      }
+    };
+
     current_resources.push(ResourceData {
       image: image.to_string(),
       name: name.to_string(),
       resource: resource.to_string(),
       namespace: namespace.to_string(),
       pipeline: pipeline.to_string(),
-      env: vec![],
+      env: env,
       secrets: secrets,
       resource_version: Meta::resource_ver(cron).unwrap_or(String::from("0"))
     });
@@ -222,7 +238,7 @@ pub fn get_operations(pipelines: Vec<Pipeline>, resources: Vec<Resource>, crons:
         break;
       }
 
-      if &resource.secrets != &current.secrets {
+      if &resource.secrets != &current.secrets || &resource.env != &current.env {
         let mut new_resource = resource.clone();
         new_resource.resource_version = current.resource_version.to_string();
         to_update.push(new_resource);

@@ -97,7 +97,7 @@ describe('Pipeline Monitor', () => {
             });
         }, TIMEOUT);
 
-        it('should update the resource watcher when the resource is updated', async () => {
+        it('should update the resource watcher when its secrets are updated', async () => {
             const newSecret = {
                 name: 'new-config',
                 mountPath: '/new-root/.ssh',
@@ -131,6 +131,23 @@ describe('Pipeline Monitor', () => {
 
                 expect(manifestHelper.getCronContainers(cronJob).map(c => c.volumeMounts)).toEqual([ expectedVolumeMounts ]);
                 expect(cronJob.spec.jobTemplate.spec.template.spec.volumes).toEqual([ expectedVolume ]);
+            });
+        }, TIMEOUT);
+
+        it('should update the resource watcher when its environment is updated', async () => {
+            const newVariable = {
+                name: 'REPO',
+                value: 'git@github.com:username/different_repo.git'
+            };
+            await apiHelper.updateResource({resource, image, variable: newVariable});
+
+            await wait.forSuccess(async () => {
+                await apiHelper.getCronJob(`${pipeline}-${resource}`)
+
+                const cronJob = await apiHelper.getCronJob(`${pipeline}-${resource}`);
+                const expectedVars = [ newVariable ];
+
+                expect(manifestHelper.getCronContainers(cronJob).map(c => c.env)).toEqual([ expectedVars ]);
             });
         }, TIMEOUT);
     });

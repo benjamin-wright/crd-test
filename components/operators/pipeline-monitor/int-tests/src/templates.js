@@ -4,15 +4,16 @@ module.exports = {
     cronJob
 }
 
-function resource({ resource, image, secret }) {
-    const defaultSecret = {
-        name: 'my-config',
-        mountPath: '/root/.ssh',
-        keys: [
-            { key: 'id-rsa.pub', path: 'id-rsa.pub' }
-        ]
-    };
+const defaultSecret = {
+    name: 'my-config',
+    mountPath: '/root/.ssh',
+    keys: [
+        { key: 'id-rsa.pub', path: 'id-rsa.pub' }
+    ]
+};
+const defaultVariable = { name: 'REPO', value: 'git@github.com:username/repo.git' }
 
+function resource({ resource, image, secret, variable }) {
     return {
         apiVersion: 'minion.ponglehub.com/v1',
         kind: 'Resource',
@@ -25,7 +26,7 @@ function resource({ resource, image, secret }) {
                 ...(secret ? [ secret ] : [ defaultSecret ])
             ],
             env: [
-                { name: 'REPO', value: 'git@github.com:username/repo.git' }
+                ...(variable ? [ variable ] : [ defaultVariable ])
             ]
         }
     };
@@ -73,8 +74,8 @@ function cronJob(name, pipeline, resource, image) {
                 "minion.ponglehub.co.uk/resource": resource,
                 "minion.ponglehub.co.uk/image": image,
                 "minion.ponglehub.co.uk/minion-type": "resource-watcher",
-                "minion.ponglehub.co.uk/secrets": "[]",
-                "minion.ponglehub.co.uk/env": "[]"
+                "minion.ponglehub.co.uk/secrets": JSON.stringify([defaultSecret]),
+                "minion.ponglehub.co.uk/env": JSON.stringify([defaultVariable])
             }
         },
         spec: {

@@ -33,6 +33,14 @@ pub struct EnvVar {
     pub value: String
 }
 
+impl PartialEq for EnvVar {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.value == other.value
+    }
+}
+
+impl Eq for EnvVar {}
+
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug)]
 #[kube(group = "minion.ponglehub.com", version = "v1", namespaced)]
 pub struct ResourceSpec {

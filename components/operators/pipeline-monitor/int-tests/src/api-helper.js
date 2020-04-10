@@ -50,11 +50,12 @@ class ApiHelper {
         return result.body;
     }
 
-    async updateResource({ resource, image, secret }) {
+    async updateResource({ resource, image, secret, variable }) {
         const body = templates.resource({
             resource,
             image: image || 'localhost/my-image',
-            secret
+            secret,
+            variable
         });
 
         const previous = await this.getResource(resource);
