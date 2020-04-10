@@ -42,18 +42,26 @@ pub async fn get_resource_watch_reflector() -> anyhow::Result<Reflector<CronJob>
     return Ok(cron_reflector);
 }
 
-pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>) -> anyhow::Result<()> {
-    let cron_api = get_cron_api(namespace);
+fn make_volume_mounts(secrets: &Vec<Secret>) -> Vec<Map<String, Value>> {
+    let mut volume_mounts = vec![];
 
-    let mut secret_mounts = vec![];
+    for secret in secrets {
+        let mut volume_mount = Map::new();
+        volume_mount.insert("name".to_string(), Value::String(secret.name.to_string()));
+        volume_mount.insert("mountPath".to_string(), Value::String(secret.mount_path.to_string()));
+        volume_mount.insert("readOnly".to_string(), Value::Bool(true));
+
+
+        volume_mounts.push(volume_mount);
+    }
+
+    return volume_mounts;
+}
+
+fn make_volumes(secrets: &Vec<Secret>) -> Vec<Map<String, Value>> {
     let mut volumes = vec![];
 
     for secret in secrets {
-        let mut secret_mount = Map::new();
-        secret_mount.insert("name".to_string(), Value::String(secret.name.to_string()));
-        secret_mount.insert("mountPath".to_string(), Value::String(secret.mount_path.to_string()));
-        secret_mount.insert("readOnly".to_string(), Value::Bool(true));
-
         let mut items = vec![];
         for key_value_pair in &secret.keys {
             let mut key = Map::new();
@@ -69,28 +77,41 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
         let mut volume = Map::new();
         volume.insert("name".to_string(), Value::String(secret.name.to_string()));
         volume.insert("secret".to_string(), Value::Object(secret_hash));
-
-        secret_mounts.push(secret_mount);
         volumes.push(volume);
     }
 
+    return volumes;
+}
+
+struct ResourceWatcherParams<'a> {
+    name: &'a str,
+    image: &'a str,
+    pipeline: &'a str,
+    resource: &'a str,
+    env: &'a Vec<EnvVar>,
+    secrets: &'a Vec<Secret>,
+    volumes: &'a Vec<Map<String, Value>>,
+    volume_mounts: &'a Vec<Map<String, Value>>
+}
+
+fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<CronJob> {
     let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
         "metadata": {
-            "name": name,
+            "name": params.name,
             "labels": {
-                "pipeline": pipeline,
-                "resource": resource,
+                "pipeline": params.pipeline,
+                "resource": params.resource,
                 "minion-type": "resource-watcher"
             },
             "annotations": {
-                "minion.ponglehub.co.uk/pipeline": pipeline,
-                "minion.ponglehub.co.uk/resource": resource,
-                "minion.ponglehub.co.uk/image": image,
+                "minion.ponglehub.co.uk/pipeline": params.pipeline,
+                "minion.ponglehub.co.uk/resource": params.resource,
+                "minion.ponglehub.co.uk/image": params.image,
                 "minion.ponglehub.co.uk/minion-type": "resource-watcher",
-                "minion.ponglehub.co.uk/env": json!(env).to_string(),
-                "minion.ponglehub.co.uk/secrets": json!(secrets).to_string()
+                "minion.ponglehub.co.uk/env": json!(params.env).to_string(),
+                "minion.ponglehub.co.uk/secrets": json!(params.secrets).to_string()
             }
         },
         "spec": {
@@ -101,20 +122,20 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
                     "template": {
                         "metadata": {
                             "labels": {
-                                "app": name
+                                "app": params.name
                             }
                         },
                         "spec": {
                             "containers": [
                                 {
-                                    "name": name,
-                                    "image": image,
+                                    "name": params.name,
+                                    "image": params.image,
                                     "command": ["./version"],
-                                    "env": env,
-                                    "volumeMounts": secret_mounts
+                                    "env": params.env,
+                                    "volumeMounts": params.volume_mounts
                                 }
                             ],
-                            "volumes": volumes,
+                            "volumes": params.volumes,
                             "restartPolicy": "Never"
                         }
                     }
@@ -122,6 +143,26 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
             }
         }
     }))?;
+
+    return Ok(cron_job);
+}
+
+pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, resource: &str, namespace: &str, env: &Vec<EnvVar>, secrets: &Vec<Secret>) -> anyhow::Result<()> {
+    let cron_api = get_cron_api(namespace);
+
+    let volumes = make_volumes(secrets);
+    let volume_mounts = make_volume_mounts(secrets);
+
+    let cron_job = get_resource_watcher_body(&ResourceWatcherParams {
+        name,
+        image,
+        pipeline,
+        resource,
+        env: &env,
+        secrets: &secrets,
+        volumes: &volumes,
+        volume_mounts: &volume_mounts
+    })?;
 
     match cron_api.create(&PostParams::default(), &cron_job).await {
         Ok(_o) => return Ok(()),
