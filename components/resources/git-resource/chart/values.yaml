@@ -1,2 +1,11 @@
 name: git-resource
 image: localhost/git-resource
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi
+
+test:
+  enabled: false
+  image: localhost/git-resource-tests

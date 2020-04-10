@@ -1,0 +1,10 @@
+{{- if .Values.test.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: git-resource-test
+rules:
+- apiGroups: ["batch"]
+  resources: ["job"]
+  verbs: ["create", "delete"]
+{{- end -}}

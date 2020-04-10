@@ -1,0 +1,19 @@
+{{- if .Values.test.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "git-resource-test-{{ .Release.Revision }}"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccount: git-resource-test
+      containers:
+      - name: test
+        image: {{ .Values.test.image }}
+        env:
+        - name: TEST_NAMESPACE
+          value: "git-resource-test-{{ .Release.Revision }}"
+        command: ["npm", "test"]
+      restartPolicy: Never
+{{- end -}}

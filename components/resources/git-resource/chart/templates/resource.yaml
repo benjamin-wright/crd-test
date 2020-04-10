@@ -10,4 +10,5 @@ spec:
     - key: id-rsa.pub
       path: /root/.ssh
   env:
-    REPO: git@github.com:username/repo.git
+    - name: REPO
+      value: git@github.com:username/repo.git

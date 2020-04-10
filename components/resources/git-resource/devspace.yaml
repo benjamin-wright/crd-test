@@ -1,0 +1,21 @@
+version: v1beta6
+images:
+  git-resource:
+    image: localhost:31500/git-resource
+    dockerfile: ./src/Dockerfile
+    context: ./src
+  git-resource-tests:
+    image: localhost:31500/git-resource-tests
+    dockerfile: ./int-tests/Dockerfile
+    context: ./int-tests
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      image: localhost:31500/git-resource
+      test:
+        enabled: true
+        image: localhost:31500/git-resource-tests
