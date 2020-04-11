@@ -1,0 +1,14 @@
+[package]
+name = "file-inspector"
+version = "0.1.0"
+authors = ["wrbe9001"]
+edition = "2018"
+
+[dependencies]
+rocket = "0.4.4"
+
+[profile.release]
+# opt-level = 'z'
+# lto = true
+# codegen-units=1
+# panic = 'abort'

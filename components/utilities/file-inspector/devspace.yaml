@@ -1,0 +1,20 @@
+version: v1beta6
+images:
+  file-inspector:
+    image: localhost:31500/file-inspector
+    dockerfile: ./code/Dockerfile
+    context: ./code
+  file-inspector-tests:
+    image: localhost:31500/file-inspector-tests
+    dockerfile: ./int-tests/Dockerfile
+    context: ./int-tests
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      image: localhost:31500/file-inspector
+      test:
+        image: localhost:31500/file-inspector-tests

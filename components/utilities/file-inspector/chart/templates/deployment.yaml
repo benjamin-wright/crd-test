@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-inspector-deployment
+  labels:
+    app: file-inspector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-inspector
+  template:
+    metadata:
+      labels:
+        app: file-inspector
+    spec:
+      containers:
+      - name: file-inspector
+        image: {{ .Values.image }}
+        env:
+        - name: PORT
+          value: {{ .Values.port | quote }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}

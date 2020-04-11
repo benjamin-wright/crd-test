@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: file-inspector
+spec:
+  type: ClusterIP
+  selector:
+    app: file-inspector
+  ports:
+  - port: 80
+    targetPort: {{ .Values.port }}
