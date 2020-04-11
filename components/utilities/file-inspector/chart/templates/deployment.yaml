@@ -17,9 +17,6 @@ spec:
       containers:
       - name: file-inspector
         image: {{ .Values.image }}
-        env:
-        - name: PORT
-          value: {{ .Values.port | quote }}
         resources:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}

@@ -16,5 +16,6 @@ RUN cargo build --release
 FROM scratch
 
 COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/file-inspector /file-inspector
+COPY Rocket.toml /Rocket.toml
 
 ENTRYPOINT [ "/file-inspector" ]

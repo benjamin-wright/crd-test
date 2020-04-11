@@ -52,7 +52,7 @@ function get-pods-for-job() {
 }
 
 function get-deployment-name() {
-    kubectl get deployment -o json | jq '.items[0].metadata.name' -r
+    kubectl get replicaset -o json | jq ".items[] | select(.metadata.name | contains(\"$deployment_name\")) | select(.spec.replicas > 0) | .metadata.name" -r
 }
 
 function get-pods-for-deployment() {

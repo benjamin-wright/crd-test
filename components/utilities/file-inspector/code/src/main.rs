@@ -2,11 +2,25 @@
 
 #[macro_use] extern crate rocket;
 
+mod cors;
+
+use cors::CORS;
+
 #[get("/")]
 fn index() -> &'static str {
-    "Hello, world!"
+    "Hello, worlds!"
+}
+
+#[get("/status")]
+fn status() -> &'static str {
+    "OK"
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![index]).launch();
+    let mut server = rocket::ignite();
+
+    server = server.attach(CORS{});
+    server = server.mount("/", routes![index, status]);
+
+    server.launch();
 }
