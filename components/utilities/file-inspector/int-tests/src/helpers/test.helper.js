@@ -1,12 +1,33 @@
 const axios = require('axios');
 
-const client = axios.create({
-    baseURL: `${process.env['TARGET_URL']}:${process.env['TARGET_PORT']}`,
-    timeout: 1000
-});
+class Client {
+    constructor() {
+        this.client = axios.create({
+            baseURL: `${process.env['TARGET_URL']}:${process.env['TARGET_PORT']}`,
+            timeout: 1000
+        });
+    }
+
+    async get(url) {
+        const errFunc = console.error;
+        console.error = () => {};
+
+        try {
+            const response = await this.client.get(url);
+            console.error = errFunc;
+            return response;
+        } catch (err) {
+            console.error = errFunc;
+            throw err;
+        }
+    }
+}
+
+const client = new Client();
 
 module.exports = {
-    waitForSpinup
+    waitForSpinup,
+    listContents
 }
 
 async function sleep(timeout) {
@@ -18,8 +39,7 @@ async function retry(promise, { timeout = 10000, poll = 250 }) {
 
     while(true) {
         try {
-            await promise();
-            break;
+            return await promise();
         } catch(err) {
             const elapsed = Date.now() - startMillis;
             if (elapsed > timeout) {
@@ -32,11 +52,16 @@ async function retry(promise, { timeout = 10000, poll = 250 }) {
 }
 
 async function waitForSpinup() {
-    const errFunc = console.error;
-    console.error = () => {};
+    await retry(async () => client.get('/status'), {});
+    await sleep(1000);
+}
 
-    const response = await retry(async () => client.get('/status'), {});
+async function listContents(dir) {
+    try {
+        const response = await client.get('/list');
 
-    console.error = errFunc;
-    return response;
+        return { status: response.status, data: response.data };
+    } catch (err) {
+        console.error(`Failed to list contents: ${err.message}`);
+    }
 }

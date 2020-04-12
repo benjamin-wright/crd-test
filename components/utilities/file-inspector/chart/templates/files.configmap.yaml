@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: test-files
+data:
+    file1.yaml: |-
+        param1: value1
+        param2: value2
+    file2.yaml: |-
+        param3: value3
+        param4: value4
+    file3.yaml: |-
+        param5: value5
+        param6: value6
+    file4.yaml: |-
+        param7: value7
+        param8: value8

@@ -21,3 +21,22 @@ spec:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}
             memory: {{ .Values.resources.limits.memory }}
+        env:
+        - name: DATA_PATH
+          value: /data
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: data-volume
+        configMap:
+          name: test-files
+          items:
+          - key: file1.yaml
+            path: file1.yaml
+          - key: file2.yaml
+            path: file2.yaml
+          - key: file3.yaml
+            path: dir1/file3.yaml
+          - key: file4.yaml
+            path: dir2/file4.yaml

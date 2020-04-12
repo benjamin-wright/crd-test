@@ -14,4 +14,6 @@ spec:
           value: http://file-inspector
         - name: TARGET_PORT
           value: "80"
+        - name: TARGET_DIR
+          value: /data
       restartPolicy: Never
