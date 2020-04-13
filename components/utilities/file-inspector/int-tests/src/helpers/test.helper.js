@@ -27,7 +27,8 @@ const client = new Client();
 
 module.exports = {
     waitForSpinup,
-    listContents
+    listContents,
+    getFile
 }
 
 async function sleep(timeout) {
@@ -56,12 +57,24 @@ async function waitForSpinup() {
     await sleep(1000);
 }
 
-async function listContents(dir) {
+async function listContents() {
     try {
         const response = await client.get('/list');
 
         return { status: response.status, data: response.data };
     } catch (err) {
         console.error(`Failed to list contents: ${err.message}`);
+        throw err;
+    }
+}
+
+async function getFile(filename) {
+    try {
+        const response = await client.get(`/file?path=${encodeURIComponent(filename)}`);
+
+        return {status: response.status, data: response.data };
+    } catch (err) {
+        console.error(`Failed to get file: ${err.message}`);
+        throw err;
     }
 }
