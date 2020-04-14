@@ -8,7 +8,8 @@ use serde_json::{json};
 
 mod cors;
 use cors::CORS;
-use std::path::Path;
+use std::path::{ Path, PathBuf };
+use rocket::response::NamedFile;
 
 #[get("/status")]
 fn status() -> Json<String> {
@@ -57,11 +58,17 @@ fn list() -> Json<String> {
     Json(json!({ "path": path.to_string(), "files": files }).to_string())
 }
 
+#[get("/file/<file..>")]
+fn file(file: PathBuf) -> Option<NamedFile> {
+    let path = env::var("DATA_PATH").unwrap_or(String::from("/data"));
+    NamedFile::open(Path::new(&path).join(file)).ok()
+}
+
 fn main() {
     let mut server = rocket::ignite();
 
     server = server.attach(CORS{});
-    server = server.mount("/", routes![status, list]);
+    server = server.mount("/", routes![status, list, file]);
 
     server.launch();
 }

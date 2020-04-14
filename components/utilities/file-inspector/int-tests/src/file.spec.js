@@ -10,6 +10,20 @@ describe('/file', () => {
         const { status, data } = await helper.getFile('file1.yaml');
 
         expect(status).toEqual(200);
-        expect(data).toEqual({});
+        expect(data).toEqual('param1: value1\nparam2: value2');
+    });
+
+    it('should fetch the other named file', async () => {
+        const { status, data } = await helper.getFile('file2.yaml');
+
+        expect(status).toEqual(200);
+        expect(data).toEqual('param3: value3\nparam4: value4');
+    });
+
+    it('should fetch a file from a subdirectory', async () => {
+        const { status, data } = await helper.getFile('dir1/file3.yaml');
+
+        expect(status).toEqual(200);
+        expect(data).toEqual('param5: value5\nparam6: value6');
     });
 });
