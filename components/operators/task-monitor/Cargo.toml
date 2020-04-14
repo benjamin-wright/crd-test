@@ -16,7 +16,7 @@ anyhow = "1.0.26"
 tokio = { version = "0.2.6", features = ["full"] }
 
 [profile.release]
-opt-level = 'z'
-lto = true
-codegen-units=1
-panic = 'abort'
+# opt-level = 'z'
+# lto = true
+# codegen-units=1
+# panic = 'abort'

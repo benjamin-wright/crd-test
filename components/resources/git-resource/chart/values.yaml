@@ -9,3 +9,4 @@ resources:
 test:
   enabled: false
   image: localhost/git-resource-tests
+  sidecar: localhost/file-inspector

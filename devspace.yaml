@@ -2,8 +2,8 @@ version: v1beta6
 images:
   pipeline-monitor:
     image: localhost:31500/pipeline-monitor
-    dockerfile: ./components/operators/pipeline-monitor/Dockerfile
-    context: ./components/operators/pipeline-monitor
+    dockerfile: ./components/operators/pipeline-monitor/code/Dockerfile
+    context: ./components/operators/pipeline-monitor/code
   task-monitor:
     image: localhost:31500/task-monitor
     dockerfile: ./components/operators/task-monitor/Dockerfile
@@ -18,8 +18,12 @@ images:
     context: ./components/resources/resource-sidecar
   git-resource:
     image: localhost:31500/git-resource
-    dockerfile: ./components/resources/git-resource/Dockerfile
-    context: ./components/resources/git-resource
+    dockerfile: ./components/resources/git-resource/code/Dockerfile
+    context: ./components/resources/git-resource/code
+  file-inspector:
+    image: localhost:31500/file-inspector
+    dockerfile: ./components/utilities/file-inspector/code/Dockerfile
+    context: ./components/utilities/file-inspector/code
 
 deployments:
 - name: operators

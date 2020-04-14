@@ -2,12 +2,16 @@ version: v1beta6
 images:
   git-resource:
     image: localhost:31500/git-resource
-    dockerfile: ./src/Dockerfile
-    context: ./src
+    dockerfile: ./code/Dockerfile
+    context: ./code
   git-resource-tests:
     image: localhost:31500/git-resource-tests
     dockerfile: ./int-tests/Dockerfile
     context: ./int-tests
+  file-inspector:
+    image: localhost:31500/file-inspector
+    dockerfile: ../../utilities/file-inspector/code/Dockerfile
+    context: ../../utilities/file-inspector/code
 
 deployments:
 - name: chart
@@ -19,3 +23,4 @@ deployments:
       test:
         enabled: true
         image: localhost:31500/git-resource-tests
+        sidecar: localhost:31500/file-inspector
