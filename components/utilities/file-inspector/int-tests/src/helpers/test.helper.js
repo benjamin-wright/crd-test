@@ -19,10 +19,6 @@ class Client {
             const req = http.request(options, res => {
                 let data = '';
 
-                if (res.statusCode < 200 || res.statusCode > 299) {
-                    return reject(new Error(`Error making request: ${res.statusCode}`));
-                }
-
                 res.on('data', chunk => {
                     data += chunk;
                 });
@@ -84,7 +80,18 @@ async function retry(promise, { timeout = 10000, poll = 250 }) {
 }
 
 async function waitForSpinup() {
-    await retry(async () => client.get('status'), {});
+    await retry(
+        async () => {
+            const response = await client.get('status');
+
+            if (response.status !== 200) {
+                throw new Error(`Expected 200 response: recieved ${response.status}`);
+            }
+
+            return response;
+        }
+        ,{}
+    );
 }
 
 async function listContents() {
@@ -93,7 +100,6 @@ async function listContents() {
 
         return { status: response.status, data: response.data };
     } catch (err) {
-        console.error(`Failed to list contents: ${err.message}`);
         throw err;
     }
 }
@@ -104,7 +110,6 @@ async function getFile(filename) {
 
         return {status: response.status, data: response.data };
     } catch (err) {
-        console.error(`Failed to get file: ${err.message}`);
         throw err;
     }
 }

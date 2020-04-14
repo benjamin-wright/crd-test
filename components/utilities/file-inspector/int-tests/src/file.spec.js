@@ -28,6 +28,8 @@ describe('/file', () => {
     });
 
     it('should not fetch a file which does not exist', async () => {
-        await expect(helper.getFile('file-missing.yaml')).rejects.toEqual(new Error("Error making request: 404"));
+        const { status } = await helper.getFile('file-missing.yaml');
+
+        expect(status).toEqual(404);
     });
 });
