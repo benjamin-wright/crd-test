@@ -26,4 +26,8 @@ describe('/file', () => {
         expect(status).toEqual(200);
         expect(data).toEqual('param5: value5\nparam6: value6');
     });
+
+    it('should not fetch a file which does not exist', async () => {
+        await expect(helper.getFile('file-missing.yaml')).rejects.toEqual(new Error("Error making request: 404"));
+    });
 });

@@ -1,34 +1,56 @@
 const axios = require('axios');
+const http = require('http');
 
 class Client {
     constructor() {
-        this.client = axios.create({
-            baseURL: `${process.env['TARGET_URL']}:${process.env['TARGET_PORT']}`,
-            timeout: 1000
-        });
+        this.host = process.env['TARGET_HOST'];
+        this.port = process.env['TARGET_PORT'];
     }
 
-    async get(url) {
-        const errFunc = console.error;
-        console.error = () => {};
-        let attempts = 0;
+    get(path) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                hostname: this.host,
+                port: this.port,
+                path: `/${path}`,
+                method: 'GET'
+            };
 
-        while (true) {
-            try {
-                const response = await axios.get(`${process.env['TARGET_URL']}:${process.env['TARGET_PORT']}/${url}`);
-                console.error = errFunc;
-                return response;
-            } catch (err) {
-                attempts += 1;
+            const req = http.request(options, res => {
+                let data = '';
 
-                if (attempts > 5) {
-                    console.error = errFunc;
-                    throw err;
+                if (res.statusCode < 200 || res.statusCode > 299) {
+                    return reject(new Error(`Error making request: ${res.statusCode}`));
                 }
 
-                await sleep(10);
-            }
-        }
+                res.on('data', chunk => {
+                    data += chunk;
+                });
+
+                res.on('end', () => {
+                    let body = null;
+                    switch (res.headers['content-type']) {
+                        case 'application/json':
+                            body = JSON.parse(data);
+                            break;
+                        default:
+                            body = data;
+                            break;
+                    }
+
+                    return resolve({
+                        status: res.statusCode,
+                        data: body
+                    });
+                });
+            });
+
+            req.on('error', error => {
+                reject(error);
+            });
+
+            req.end();
+        });
     }
 }
 
@@ -63,7 +85,6 @@ async function retry(promise, { timeout = 10000, poll = 250 }) {
 
 async function waitForSpinup() {
     await retry(async () => client.get('status'), {});
-    await sleep(1000);
 }
 
 async function listContents() {

@@ -10,8 +10,8 @@ spec:
       - name: test
         image: {{ .Values.test.image }}
         env:
-        - name: TARGET_URL
-          value: http://file-inspector
+        - name: TARGET_HOST
+          value: file-inspector
         - name: TARGET_PORT
           value: "80"
         - name: TARGET_DIR
