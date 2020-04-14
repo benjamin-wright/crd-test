@@ -4,16 +4,20 @@ use std::{ env, fs, io };
 
 #[macro_use] extern crate rocket;
 use rocket::response::content::{ Json };
+use rocket::response::status::{ Accepted };
+use rocket::State;
+
 use serde_json::{json};
 
 mod cors;
 use cors::CORS;
 use std::path::{ Path, PathBuf };
 use rocket::response::NamedFile;
+use std::time::{Duration, Instant};
 
 #[get("/status")]
-fn status() -> Json<String> {
-    Json(json!({ "Status": "OK" }).to_string())
+fn status(state: State<TimeState>) -> Json<String> {
+    Json(json!({ "Status": "OK", "Uptime": state.start_time.elapsed().as_secs() }).to_string())
 }
 
 fn get_entries<'a>(path: &'a str) -> io::Result<Vec<String>> {
@@ -64,11 +68,26 @@ fn file(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new(&path).join(file)).ok()
 }
 
+#[post("/exit")]
+fn exit() -> Accepted<Json<String>> {
+    std::thread::spawn(|| {
+        std::thread::sleep(Duration::from_millis(500));
+        std::process::exit(0);
+    });
+
+    Accepted(Some(Json(json!({ "status": "accepted" }).to_string())))
+}
+
+struct TimeState {
+    start_time: Instant
+}
+
 fn main() {
     let mut server = rocket::ignite();
 
+    server = server.manage(TimeState{ start_time: Instant::now() });
     server = server.attach(CORS{});
-    server = server.mount("/", routes![status, list, file]);
+    server = server.mount("/", routes![status, list, file, exit]);
 
     server.launch();
 }

@@ -7,13 +7,13 @@ class Client {
         this.port = process.env['TARGET_PORT'];
     }
 
-    get(path) {
+    call(path, method) {
         return new Promise((resolve, reject) => {
             const options = {
                 hostname: this.host,
                 port: this.port,
                 path: `/${path}`,
-                method: 'GET'
+                method
             };
 
             const req = http.request(options, res => {
@@ -48,14 +48,25 @@ class Client {
             req.end();
         });
     }
+
+    get(path) {
+        return this.call(path, 'GET');
+    }
+
+    post(path) {
+        return this.call(path, 'POST');
+    }
 }
 
 const client = new Client();
 
 module.exports = {
     waitForSpinup,
+    waitForRestart,
     listContents,
-    getFile
+    getFile,
+    getUptime,
+    callExit
 }
 
 async function sleep(timeout) {
@@ -94,22 +105,47 @@ async function waitForSpinup() {
     );
 }
 
-async function listContents() {
-    try {
-        const response = await client.get('list');
+async function waitForRestart(lastUptime, timeout = 10000) {
+    const startMillis = Date.now();
 
-        return { status: response.status, data: response.data };
+    try {
+        while (true) {
+            if (Date.now() > startMillis + timeout) {
+                const err = new Error(`Server did not restart within ${Math.round(timeout / 1000)} seconds`);
+                err.timeout = true;
+                throw err;
+            }
+
+            await client.get('status');
+            await sleep(500);
+        }
     } catch (err) {
-        throw err;
+        if (err.timeout) {
+            throw err;
+        }
     }
+
+    await waitForSpinup();
+}
+
+async function getUptime() {
+    const response = await client.get('status');
+
+    if (response.status !== 200) {
+        throw new Error(`Failed to get status: ${response.status}`);
+    }
+
+    return response.data.Uptime;
+}
+
+async function listContents() {
+    return await client.get('list');
 }
 
 async function getFile(filename) {
-    try {
-        const response = await client.get(`file/${filename}`);
+    return await client.get(`file/${filename}`);
+}
 
-        return {status: response.status, data: response.data };
-    } catch (err) {
-        throw err;
-    }
+async function callExit() {
+    return await client.post('exit');
 }
