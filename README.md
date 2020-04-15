@@ -20,7 +20,7 @@ The image must implement the following commands:
 
 | Executable | Description                                                               |
 | ---        | ---                                                                       |
-| version    | Writes a string value into the /version.txt file                          |
+| version    | Writes a string value into the /input/version.txt file                          |
 | load       | Writes the loaded data to the /input directory (optional)                 |
 | push       | Updates the resource with the content of the /output directory (optional) |
 

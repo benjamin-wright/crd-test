@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   name: git-resource-test
 rules:
-- apiGroups: ["batch"]
-  resources: ["job"]
-  verbs: ["create", "delete"]
+- apiGroups: ["", "batch"]
+  resources: ["services", "jobs"]
+  verbs: ["create", "delete", "get"]
 {{- end -}}
