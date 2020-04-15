@@ -6,14 +6,18 @@ describe('version', () => {
         await runner.init();
     });
 
+    afterEach(async () => {
+        await this.fileInspector.exit();
+    });
+
     it('should create a version.txt file', async () => {
         const testName = 'version-test-1'
         await runner.runTest({ name: testName, action: 'version' });
 
-        const fileInspector = new FileInspector(testName);
-        await fileInspector.waitUntilReady();
+        this.fileInspector = new FileInspector(testName);
+        await this.fileInspector.waitUntilReady();
 
-        const result = await fileInspector.list();
+        const result = await this.fileInspector.list();
         expect(result.files).toEqual([ 'input/version.txt' ]);
     });
 
@@ -21,10 +25,10 @@ describe('version', () => {
         const testName = 'version-test-2'
         await runner.runTest({ name: testName, action: 'version' });
 
-        const fileInspector = new FileInspector(testName);
-        await fileInspector.waitUntilReady();
+        this.fileInspector = new FileInspector(testName);
+        await this.fileInspector.waitUntilReady();
 
-        const result = await fileInspector.get('input/version.txt');
-        expect(result).toEqual('v1');
+        const result = await this.fileInspector.get('input/version.txt');
+        expect(result).toMatch(/^[a-zA-Z0-9]{40}(\r\n|\r|\n)$/)
     });
 });

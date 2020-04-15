@@ -52,7 +52,7 @@ module.exports = class FileInspector {
     async waitUntilReady() {
         while (true) {
             try {
-                const response = await call(`${this.url}/status`);
+                const response = await call(`${this.url}/status`, 'GET');
                 if (response.status === 200) {
                     return;
                 };
@@ -64,7 +64,7 @@ module.exports = class FileInspector {
     }
 
     async list() {
-        const response = await call(`${this.url}/list`);
+        const response = await call(`${this.url}/list`, 'GET');
 
         if (response.status !== 200) {
             throw new Error(`Error getting files list: ${response.status}`);
@@ -74,10 +74,20 @@ module.exports = class FileInspector {
     }
 
     async get(file) {
-        const response = await call(`${this.url}/file/${file}`);
+        const response = await call(`${this.url}/file/${file}`, 'GET');
 
         if (response.status !== 200) {
             throw new Error(`Error getting file "${file}": ${response.status}`);
+        }
+
+        return response.data;
+    }
+
+    async exit() {
+        const response = await call(`${this.url}/exit`, 'POST');
+
+        if (response.status !== 202) {
+            throw new Error(`Error shutting down the file-inspector: ${response.status}`);
         }
 
         return response.data;

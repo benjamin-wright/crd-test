@@ -10,3 +10,5 @@ test:
   enabled: false
   image: localhost/git-resource-tests
   sidecar: localhost/file-inspector
+  repo: https://github.com/bitnami/charts.git
+  branch: master

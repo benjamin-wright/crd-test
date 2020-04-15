@@ -1,6 +1,8 @@
 const gitResourceImage = process.env['GIT_RESOURCE_IMAGE'];
 const fileInspectorImage = process.env['FILE_INSPECTOR_IMAGE'];
 const namespace = process.env['TEST_NAMESPACE'];
+const testRepo = process.env['TEST_REPO'];
+const testBranch = process.env['TEST_BRANCH'];
 
 const Client = require('kubernetes-client').Client;
 const Request = require('kubernetes-client/backends/request');
@@ -45,6 +47,10 @@ function getJobBody(name, action) {
                             name: 'test',
                             image: gitResourceImage,
                             command: [ `./${action}` ],
+                            env: [
+                                { name: 'REPO', value: testRepo },
+                                { name: 'BRANCH', value: testBranch },
+                            ],
                             volumeMounts: [
                                 {
                                     name: 'inputs',

@@ -33,6 +33,7 @@ spec:
   image: docker.io/resource-checker
   env:
     REPO: git@github.com:username/repo.git
+    BRANCH: master
   secrets:
   - name: my-config
     keys:
