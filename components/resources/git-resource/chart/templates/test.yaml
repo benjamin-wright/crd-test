@@ -14,6 +14,8 @@ spec:
         env:
         - name: TEST_NAMESPACE
           value: "git-resource-test-{{ .Release.Revision }}"
+        - name: PARENT_REPO
+          value: {{ .Values.test.parentRepo }}
         - name: TEST_REPO
           value: {{ .Values.test.repo }}
         - name: TEST_BRANCH
@@ -23,5 +25,7 @@ spec:
         - name: FILE_INSPECTOR_IMAGE
           value: {{ .Values.test.sidecar }}
         command: ["npm", "test"]
+        {{ include "resources" .Values.test.resources | indent 8 | trim }}
       restartPolicy: Never
+
 {{- end -}}

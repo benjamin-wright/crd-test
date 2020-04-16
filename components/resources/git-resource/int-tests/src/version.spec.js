@@ -1,5 +1,6 @@
 const runner = require('./test-runner');
 const FileInspector = require('./file-inspector');
+const RepoManager = require('./repo-manager');
 
 describe('version', () => {
     beforeAll(async () => {
@@ -11,6 +12,9 @@ describe('version', () => {
     });
 
     it('should create a version.txt file', async () => {
+        const repoManager = new RepoManager();
+        await repoManager.waitUntilReady();
+
         const testName = 'version-test-1'
         await runner.runTest({ name: testName, action: 'version' });
 
@@ -21,7 +25,7 @@ describe('version', () => {
         expect(result.files).toEqual([ 'input/version.txt' ]);
     });
 
-    it('should get the latest version', async () => {
+    it.skip('should get the latest version', async () => {
         const testName = 'version-test-2'
         await runner.runTest({ name: testName, action: 'version' });
 

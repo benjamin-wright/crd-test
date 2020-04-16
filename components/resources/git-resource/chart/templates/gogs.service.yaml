@@ -1,0 +1,17 @@
+{{- if .Values.test.enabled -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: git-repo
+spec:
+  type: ClusterIP
+  selector:
+    app: git-repo
+  ports:
+  - name: ssh
+    port: {{ .Values.git.sshPort }}
+    targetPort: {{ .Values.git.sshPort }}
+  - name: ui
+    port: {{ .Values.git.uiPort }}
+    targetPort: {{ .Values.git.uiPort }}
+{{- end -}}

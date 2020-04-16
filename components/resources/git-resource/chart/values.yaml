@@ -1,14 +1,29 @@
 name: git-resource
 image: localhost/git-resource
 
-resources:
-  limits:
-    cpu: 100m
-    memory: 64Mi
+git:
+  image: gogs/gogs
+  sshPort: 22
+  uiPort: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 test:
   enabled: false
   image: localhost/git-resource-tests
   sidecar: localhost/file-inspector
-  repo: https://github.com/bitnami/charts.git
+  parentRepo: http://git-repo:3000
+  repo: http://git-repo:3000/test-account/test-repo.git
   branch: master
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi

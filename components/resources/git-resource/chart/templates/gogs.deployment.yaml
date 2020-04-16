@@ -1,0 +1,25 @@
+{{- if .Values.test.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-repo-deployment
+  labels:
+    app: git-repo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-repo
+  template:
+    metadata:
+      labels:
+        app: git-repo
+    spec:
+      containers:
+      - name: git-repo
+        image: {{ .Values.git.image }}
+        {{ include "resources" .Values.git.resources | indent 8 | trim }}
+        ports:
+        - containerPort: {{ .Values.git.sshPort }}
+        - containerPort: {{ .Values.git.uiPort }}
+{{- end -}}
