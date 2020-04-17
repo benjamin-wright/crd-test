@@ -5,6 +5,8 @@ metadata:
   name: git-repo-deployment
   labels:
     app: git-repo
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/gogs.config.yaml") . | sha256sum }}
 spec:
   replicas: 1
   selector:
@@ -19,7 +21,14 @@ spec:
       - name: git-repo
         image: {{ .Values.git.image }}
         {{ include "resources" .Values.git.resources | indent 8 | trim }}
-        ports:
-        - containerPort: {{ .Values.git.sshPort }}
-        - containerPort: {{ .Values.git.uiPort }}
+        volumeMounts:
+        - name: config
+          mountPath: /data/gogs/conf
+      volumes:
+      - name: config
+        configMap:
+          name: gogs-config
+          items:
+          - key: app.ini
+            path: app.ini
 {{- end -}}

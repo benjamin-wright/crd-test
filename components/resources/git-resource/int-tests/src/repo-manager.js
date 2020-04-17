@@ -50,7 +50,7 @@ module.exports = class RepoManager {
     }
 
     async waitUntilReady() {
-        const response = await call(`${this.url}/install`, 'POST');
+        const response = await call(`${this.url}/user/repos`, 'GET');
         console.log(response);
 
         throw new Error('Hi!');

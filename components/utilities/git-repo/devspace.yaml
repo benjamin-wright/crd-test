@@ -1,0 +1,20 @@
+version: v1beta6
+images:
+  git-repo:
+    image: localhost:31500/git-repo
+    dockerfile: ./code/Dockerfile
+    context: ./code
+  git-repo-tests:
+    image: localhost:31500/git-repo-tests
+    dockerfile: ./int-tests/Dockerfile
+    context: ./int-tests
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      image: localhost:31500/git-repo
+      test:
+        image: localhost:31500/git-repo-tests

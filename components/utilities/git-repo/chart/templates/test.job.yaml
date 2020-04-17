@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "git-repo-test-{{ .Release.Revision }}"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: test
+        image: {{ .Values.test.image }}
+        volumeMounts:
+        - name: ssh-secret
+          mountPath: /.ssh
+      volumes:
+      - name: ssh-secret
+        secret:
+          secretName: ssh-keys
+          items:
+          - key: id_rsa
+            path: idrsa
+          - key: id_rsa.pub
+            path: idrsa.pub
+      restartPolicy: Never

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-repo-deployment
+  labels:
+    app: git-repo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-repo
+  template:
+    metadata:
+      labels:
+        app: git-repo
+    spec:
+      containers:
+      - name: git-repo
+        image: {{ .Values.image }}
+        env:
+        - name: PRESET_USER
+          value: {{ .Values.preset.user }}
+        - name: PRESET_KEY
+          value: {{ .Values.preset.idrsapub }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}

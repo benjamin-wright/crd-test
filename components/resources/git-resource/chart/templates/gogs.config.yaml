@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gogs-config
+data:
+  app.ini: |
+    [server]
+    ; Whether to disable using CDN for static files regardless.
+    OFFLINE_MODE = true
+
+    ; Whether to start a builtin SSH server.
+    START_SSH_SERVER = false
+
+    [database]
+    ; The database backend, either "postgres", "mysql" "sqlite3" or "mssql".
+    ; You can connect to TiDB with MySQL protocol.
+    TYPE = sqlite3
+
+    [security]
+    ; Whether to show the install page, set this to "true" to bypass it.
+    INSTALL_LOCK = true
