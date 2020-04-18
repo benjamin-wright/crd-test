@@ -17,11 +17,16 @@ spec:
       containers:
       - name: git-repo
         image: {{ .Values.image }}
+        ports:
+        - name: ssh
+          containerPort: 22
         env:
-        - name: PRESET_USER
-          value: {{ .Values.preset.user }}
-        - name: PRESET_KEY
-          value: {{ .Values.preset.idrsapub }}
+        - name: TEST_USER
+          value: {{ .Values.test.user }}
+        - name: TEST_REPO
+          value: {{ .Values.test.repo }}
+        - name: TEST_KEY
+          value: {{ .Values.test.id_rsapub }}
         resources:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}

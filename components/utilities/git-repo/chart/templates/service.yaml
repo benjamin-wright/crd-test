@@ -7,5 +7,5 @@ spec:
   selector:
     app: git-repo
   ports:
-  - port: 80
-    targetPort: {{ .Values.port }}
+  - port: 22
+    targetPort: 22

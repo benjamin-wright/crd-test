@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest -i"
+    "pretest": "setup/pre-test.sh",
+    "test": "jest -i --detectOpenHandles",
+    "posttest": "ls -la ./tmp/checkout"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
-    "jest": "^25.3.0"
+    "jest": "^25.3.0",
+    "simple-git": "^1.132.0"
   }
 }

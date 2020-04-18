@@ -46,11 +46,11 @@ add_user(){
 }
 
 echo "Add base user..."
-add_user $PRESET_USER $PRESET_KEY
+add_user $TEST_USER $TEST_KEY
 echo "Base user...Complete"
 
 echo "Make starting repo..."
-git init test_repo --bare
+git init $TEST_REPO --bare
 
 echo "Starting syslogd..."
 /sbin/syslogd &

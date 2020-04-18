@@ -9,16 +9,22 @@ spec:
       containers:
       - name: test
         image: {{ .Values.test.image }}
+        env:
+        - name: TEST_USER
+          value: {{ .Values.test.user }}
+        - name: TEST_REPO
+          value: {{ .Values.test.repo }}
         volumeMounts:
         - name: ssh-secret
-          mountPath: /.ssh
+          mountPath: /data/test/.ssh
+          readOnly: false
       volumes:
       - name: ssh-secret
         secret:
           secretName: ssh-keys
           items:
           - key: id_rsa
-            path: idrsa
+            path: id_rsa
           - key: id_rsa.pub
-            path: idrsa.pub
+            path: id_rsa.pub
       restartPolicy: Never
