@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-repo-{{ .Release.Revision }}
+  labels:
+    app: git-repo-{{ .Release.Revision }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-repo-{{ .Release.Revision }}
+  template:
+    metadata:
+      labels:
+        app: git-repo-{{ .Release.Revision }}
+    spec:
+      containers:
+      - name: git-repo-{{ .Release.Revision }}
+        image: {{ .Values.git.image }}
+        ports:
+        - name: ssh
+          containerPort: 22
+        env:
+        - name: TEST_USER
+          value: {{ .Values.test.git.user }}
+        - name: TEST_REPO
+          value: {{ .Values.test.git.repo }}
+        - name: TEST_KEY
+          value: {{ .Values.test.git.id_rsa_pub }}

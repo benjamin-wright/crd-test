@@ -12,10 +12,6 @@ describe('repo', () => {
         gitInstance = git();
     });
 
-    afterAll(() => {
-
-    });
-
     it('should allow clone', async () => {
         await gitInstance.clone(connectionString, "./tmp/checkout");
     }, 20000);

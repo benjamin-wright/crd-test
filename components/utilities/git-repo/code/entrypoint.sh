@@ -52,6 +52,8 @@ echo "Base user...Complete"
 echo "Make starting repo..."
 git init $TEST_REPO --bare
 
+chmod -R a+rw /git/$TEST_REPO
+
 echo "Starting syslogd..."
 /sbin/syslogd &
 

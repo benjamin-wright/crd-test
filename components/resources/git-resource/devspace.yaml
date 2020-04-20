@@ -12,6 +12,10 @@ images:
     image: localhost:31500/file-inspector
     dockerfile: ../../utilities/file-inspector/code/Dockerfile
     context: ../../utilities/file-inspector/code
+  git-repo:
+    image: localhost:31500/git-repo
+    dockerfile: ../../utilities/git-repo/code/Dockerfile
+    context: ../../utilities/git-repo/code
 
 deployments:
 - name: chart
@@ -23,4 +27,7 @@ deployments:
       test:
         enabled: true
         image: localhost:31500/git-resource-tests
-        sidecar: localhost:31500/file-inspector
+      sidecar:
+        image: localhost:31500/file-inspector
+      git:
+        image: localhost:31500/git-repo

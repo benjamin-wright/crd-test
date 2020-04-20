@@ -1,8 +1,6 @@
 const gitResourceImage = process.env['GIT_RESOURCE_IMAGE'];
 const fileInspectorImage = process.env['FILE_INSPECTOR_IMAGE'];
-const namespace = process.env['TEST_NAMESPACE'];
-const testRepo = process.env['TEST_REPO'];
-const testBranch = process.env['TEST_BRANCH'];
+const env = require('./environment');
 
 const Client = require('kubernetes-client').Client;
 const Request = require('kubernetes-client/backends/request');
@@ -20,8 +18,8 @@ async function init() {
 }
 
 async function runTest({ name, action }) {
-    await client.apis.batch.v1.namespaces(namespace).jobs.post({ body: getJobBody(name, action) });
-    await client.api.v1.namespaces(namespace).services.post({ body: getServiceBody(name) });
+    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action) });
+    await client.api.v1.namespaces(env.namespace).services.post({ body: getServiceBody(name) });
 }
 
 function getJobBody(name, action) {
@@ -48,8 +46,8 @@ function getJobBody(name, action) {
                             image: gitResourceImage,
                             command: [ `./${action}` ],
                             env: [
-                                { name: 'REPO', value: testRepo },
-                                { name: 'BRANCH', value: testBranch },
+                                { name: 'REPO', value: `ssh://${env.user}@${env.host}/git/${env.repo}` },
+                                { name: 'BRANCH', value: env.branch },
                             ],
                             volumeMounts: [
                                 {

@@ -1,19 +1,25 @@
 const runner = require('./test-runner');
 const FileInspector = require('./file-inspector');
-const RepoManager = require('./repo-manager');
+const gitHelper = require('./git-helper');
 
 describe('version', () => {
     beforeAll(async () => {
-        await runner.init();
+        try {
+            await runner.init();
+            await gitHelper.init();
+        } catch (err) {
+            console.error(`Init error: ${err}`);
+        }
     });
 
     afterEach(async () => {
-        await this.fileInspector.exit();
+        if (this.fileInspector) {
+            await this.fileInspector.exit();
+        }
     });
 
     it('should create a version.txt file', async () => {
-        const repoManager = new RepoManager();
-        await repoManager.waitUntilReady();
+        await gitHelper.addCommitMessage('test-file-1.txt', 'a message', 'contents');
 
         const testName = 'version-test-1'
         await runner.runTest({ name: testName, action: 'version' });
@@ -25,7 +31,9 @@ describe('version', () => {
         expect(result.files).toEqual([ 'input/version.txt' ]);
     });
 
-    it.skip('should get the latest version', async () => {
+    it('should get the latest version', async () => {
+        const commit = await gitHelper.addCommitMessage('test-file-2.txt', 'another message', 'more contents');
+
         const testName = 'version-test-2'
         await runner.runTest({ name: testName, action: 'version' });
 
@@ -33,6 +41,6 @@ describe('version', () => {
         await this.fileInspector.waitUntilReady();
 
         const result = await this.fileInspector.get('input/version.txt');
-        expect(result).toMatch(/^[a-zA-Z0-9]{40}(\r\n|\r|\n)$/)
+        expect(result).toEqual(commit);
     });
 });

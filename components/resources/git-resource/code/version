@@ -1,3 +1,6 @@
 #!/bin/sh
 
-git ls-remote $REPO -c $BRANCH | awk '{print $1}' > /input/version.txt
+set -o errexit -o pipefail
+
+version_tags=$(git ls-remote $REPO -c $BRANCH)
+echo "$version_tags"| awk '{print $1}' > /input/version.txt

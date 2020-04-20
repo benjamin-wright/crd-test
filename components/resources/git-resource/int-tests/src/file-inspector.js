@@ -1,5 +1,5 @@
 const http = require('http');
-const namespace = process.env['TEST_NAMESPACE'];
+const namespace = require('./environment').namespace;
 
 async function call(url, method) {
     return new Promise((resolve, reject) => {

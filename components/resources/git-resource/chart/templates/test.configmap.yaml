@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-env
+data:
+  TEST_NAMESPACE: "git-resource-test-{{ .Release.Revision }}"
+  TEST_GIT_HOST: {{ .Values.test.git.host }}
+  TEST_REPO: {{ .Values.test.git.repo }}
+  TEST_BRANCH: {{ .Values.test.git.branch }}
+  TEST_USER: {{ .Values.test.git.user }}
+  GIT_RESOURCE_IMAGE: {{ .Values.image }}
+  FILE_INSPECTOR_IMAGE: {{ .Values.sidecar.image }}
+  TEST_SSH_KEY: {{ .Values.test.git.id_rsa }}
+  TEST_SSH_PUBLIC_KEY: {{ .Values.test.git.id_rsa_pub }}
