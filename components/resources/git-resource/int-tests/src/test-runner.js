@@ -18,11 +18,12 @@ async function init() {
 }
 
 async function runTest({ name, action }) {
-    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action) });
+    await client.api.v1.namespaces(env.namespace).secrets.post({ body: getSecretBody(`${name}-ssh-keys`, env.sshKey, env.sshPublicKey) });
+    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`) });
     await client.api.v1.namespaces(env.namespace).services.post({ body: getServiceBody(name) });
 }
 
-function getJobBody(name, action) {
+function getJobBody(name, action, secret) {
     return {
         apiVersion: 'batch/v1',
         kind: 'Job',
@@ -33,6 +34,7 @@ function getJobBody(name, action) {
             }
         },
         spec: {
+            backoffLimit: 0,
             template: {
                 metadata: {
                     labels: {
@@ -57,6 +59,11 @@ function getJobBody(name, action) {
                                 {
                                     name: 'outputs',
                                     mountPath: '/output'
+                                },
+                                {
+                                    name: 'ssh',
+                                    mountPath: '/data/ssh',
+                                    readOnly: true
                                 }
                             ]
                         }
@@ -85,6 +92,12 @@ function getJobBody(name, action) {
                         {
                             name: 'outputs',
                             emptyDir: {}
+                        },
+                        {
+                            name: 'ssh',
+                            secret: {
+                                secretName: secret
+                            }
                         }
                     ],
                     restartPolicy: 'Never'
@@ -115,6 +128,20 @@ function getServiceBody(name) {
                     targetPort: 80
                 }
             ]
+        }
+    }
+}
+
+function getSecretBody(name, sslPrivateKey, sslPublicKey) {
+    return {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: {
+            name
+        },
+        data: {
+            'id_rsa': sslPrivateKey,
+            'id_rsa.pub': sslPublicKey
         }
     }
 }

@@ -5,6 +5,6 @@ metadata:
   name: git-resource-test
 rules:
 - apiGroups: ["", "batch"]
-  resources: ["services", "jobs"]
+  resources: ["services", "jobs", "secrets"]
   verbs: ["create", "delete", "get"]
 {{- end -}}

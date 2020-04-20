@@ -5,7 +5,7 @@ test:
   enabled: false
   image: localhost/git-resource-tests
   git:
-    host: git-repo
+    host: git-repo.crd-test.svc.cluster.local
     repo: test-repo
     user: test-user
     branch: master

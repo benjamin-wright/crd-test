@@ -10,7 +10,7 @@ describe('version', () => {
         } catch (err) {
             console.error(`Init error: ${err}`);
         }
-    });
+    }, 20000);
 
     afterEach(async () => {
         if (this.fileInspector) {

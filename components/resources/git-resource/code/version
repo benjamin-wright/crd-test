@@ -2,5 +2,27 @@
 
 set -o errexit -o pipefail
 
+printf "Running for $REPO:$BRANCH\n"
+
+echo "copying ssh keys..."
+mkdir -p ~/.ssh
+cp /data/ssh/* ~/.ssh
+chmod 600 ~/.ssh/id_rsa
+
+cat ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub
+
+echo "updating known_hosts.."
+ssh-keyscan -H git-repo >> ~/.ssh/known_hosts
+
+echo "cloning..."
+git clone $REPO
+
+echo "listing..."
+ls -la
+
+echo "tag listing..."
 version_tags=$(git ls-remote $REPO -c $BRANCH)
+
+echo "echoing to file..."
 echo "$version_tags"| awk '{print $1}' > /input/version.txt
