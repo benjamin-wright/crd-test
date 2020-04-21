@@ -49,6 +49,7 @@ function getJobBody(name, action, secret) {
                             command: [ `./${action}` ],
                             env: [
                                 { name: 'REPO', value: `ssh://${env.user}@${env.host}/git/${env.repo}` },
+                                { name: 'REPO_HOST', value: env.host },
                                 { name: 'BRANCH', value: env.branch },
                             ],
                             volumeMounts: [

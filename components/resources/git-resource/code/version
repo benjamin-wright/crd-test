@@ -13,13 +13,13 @@ cat ~/.ssh/id_rsa
 cat ~/.ssh/id_rsa.pub
 
 echo "updating known_hosts.."
-ssh-keyscan -H git-repo >> ~/.ssh/known_hosts
+ssh-keyscan -H $REPO_HOST >> ~/.ssh/known_hosts
 
 echo "cloning..."
 git clone $REPO
 
 echo "listing..."
-ls -la
+ls -la test-repo
 
 echo "tag listing..."
 version_tags=$(git ls-remote $REPO -c $BRANCH)

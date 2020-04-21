@@ -29,7 +29,7 @@ describe('version', () => {
 
         const result = await this.fileInspector.list();
         expect(result.files).toEqual([ 'input/version.txt' ]);
-    });
+    }, 10000);
 
     it('should get the latest version', async () => {
         const commit = await gitHelper.addCommitMessage('test-file-2.txt', 'another message', 'more contents');
@@ -41,6 +41,6 @@ describe('version', () => {
         await this.fileInspector.waitUntilReady();
 
         const result = await this.fileInspector.get('input/version.txt');
-        expect(result).toEqual(commit);
-    });
+        expect(result.substring(0, 7)).toEqual(commit);
+    }, 10000);
 });
