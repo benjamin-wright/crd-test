@@ -126,20 +126,26 @@ Nice to have:
 
 graph LR;
   pipeline(pipeline)
+  user_resource(resource)
 
+  user --> user_resource;
   user --> pipeline;
   pipeline --> PipelineMonitor;
+  user_resource --> PipelineMonitor;
   PipelineMonitor --> resource;
   PipelineMonitor --> sidecar;
 
   subgraph ResourcePod
     sidecar;
     resource;
-    volume;
+    volume[EmptyDir];
 
     resource --> volume;
     sidecar --> volume;
   end
+
+  Version(Version)
+  Run(PipelineRun)
 
   sidecar --> Version;
   Version --> VersionMonitor;
@@ -151,7 +157,7 @@ graph LR;
   subgraph TaskPod
     TaskSidecar[sidecar];
     TaskImage;
-    TaskVolume[volume];
+    TaskVolume[PV];
 
     TaskSidecar --> TaskVolume;
     TaskImage --> TaskVolume;
