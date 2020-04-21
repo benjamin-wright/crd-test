@@ -2,6 +2,9 @@ const runner = require('./test-runner');
 const FileInspector = require('./file-inspector');
 const gitHelper = require('./git-helper');
 
+const START_TIMEOUT = 20000;
+const TEST_TIMEOUT = 10000;
+
 describe('version', () => {
     beforeAll(async () => {
         try {
@@ -10,7 +13,7 @@ describe('version', () => {
         } catch (err) {
             console.error(`Init error: ${err}`);
         }
-    }, 20000);
+    }, START_TIMEOUT);
 
     afterEach(async () => {
         if (this.fileInspector) {
@@ -29,7 +32,7 @@ describe('version', () => {
 
         const result = await this.fileInspector.list();
         expect(result.files).toEqual([ 'input/version.txt' ]);
-    }, 10000);
+    }, TEST_TIMEOUT);
 
     it('should get the latest version', async () => {
         const commit = await gitHelper.addCommitMessage('test-file-2.txt', 'another message', 'more contents');
@@ -42,5 +45,5 @@ describe('version', () => {
 
         const result = await this.fileInspector.get('input/version.txt');
         expect(result.substring(0, 7)).toEqual(commit);
-    }, 10000);
+    }, TEST_TIMEOUT);
 });
