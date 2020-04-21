@@ -1,25 +1,8 @@
 #!/bin/sh
 
-set -o errexit -o pipefail
+. ./common.sh
 
-printf "Running for $REPO:$BRANCH\n"
-
-echo "copying ssh keys..."
-mkdir -p ~/.ssh
-cp /data/ssh/* ~/.ssh
-chmod 600 ~/.ssh/id_rsa
-
-cat ~/.ssh/id_rsa
-cat ~/.ssh/id_rsa.pub
-
-echo "updating known_hosts.."
-ssh-keyscan -H $REPO_HOST >> ~/.ssh/known_hosts
-
-echo "cloning..."
-git clone $REPO
-
-echo "listing..."
-ls -la test-repo
+printf "Running 'Version' for $REPO:$BRANCH\n"
 
 echo "tag listing..."
 version_tags=$(git ls-remote $REPO -c $BRANCH)

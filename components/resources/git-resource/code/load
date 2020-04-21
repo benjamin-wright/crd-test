@@ -1,3 +1,8 @@
 #!/bin/sh
 
-exit 1
+. ./common.sh
+
+printf "Running 'Load' for $REPO:$BRANCH\n"
+
+if [[ "$CHECKOUT_DIR" == "" ]]; then
+fi
