@@ -177,9 +177,9 @@ Within individual projects in the `/components` directory, `run-test` is a utili
 
 | Directory        | Contents                                                                |
 | ---              | ---                                                                     |
-| `/infrastructure`| Helm charts and configs for setting up the underlying infrastructure    |
-| `/deployment`    | Helm charts for deployment of the entire solution                       |
-| `/scripts`       | Automation scripts and helpers for use in devspace commands             |
 | `/aliases`       | Helper commands designed to be executed within component directories    |
-| `/tests`         | Some example resources that can be `kubectl apply`ed for manual testing |
 | `/components`    | Source code for all the docker images                                   |
+| `/deployment`    | Helm charts for deployment of the entire solution                       |
+| `/infrastructure`| Helm charts and configs for setting up the underlying infrastructure    |
+| `/scripts`       | Automation scripts and helpers for use in devspace commands             |
+| `/tests`         | Some example resources that can be `kubectl apply`ed for manual testing |
