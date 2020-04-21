@@ -6,17 +6,7 @@ An entirely kubernetes-based CI system, using CRDs as the specification language
 
 ### Resource
 ---
-A resource is a way of checking an external data source for the latest version, loading data and publishing data. It must accept:
-
-| ENV_VAR     | Description                                           |
-| ---         | ---                                                   |
-| SOURCE_PATH | location to load within the source (optional)         |
-| LOAD_PATH   | where in the local file system to store the data      |
-| TARGET_PATH | where in the remote resource to store data (optional) |
-
-You can specify additional accepted environment variables with the `additionalVars` block
-
-The image must implement the following commands:
+A resource is a way of checking an external data source for the latest version, loading data and publishing data. It is basically just a docker image, and must implement the following commands as executables within its working directory:
 
 | Executable | Description                                                               |
 | ---        | ---                                                                       |
