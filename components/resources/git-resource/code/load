@@ -2,10 +2,21 @@
 
 . ./common.sh
 
-printf "Running 'Load' for $REPO:$BRANCH\n"
+ensure_env CURRENT_VERSION
+
+printf "Running 'Load' for $REPO:$LOAD_VERSION\n"
+
+TMP_DIR=/tmp/checkout
+
+git clone $REPO $TMP_DIR
+
+cd $TMP_DIR
+
+git checkout $CURRENT_VERSION
 
 if [[ "$CHECKOUT_DIR" == "" ]]; then
-    git clone $REPO /input
+    mv $TMP_DIR/* /output
 else
-    git clone $REPO /input/$CHECKOUT_DIR
+    mkdir -p /output/$CHECKOUT_DIR
+    mv $TMP_DIR/* /output/$CHECKOUT_DIR
 fi

@@ -4,8 +4,28 @@
 
 printf "Running 'Version' for $REPO:$BRANCH\n"
 
-echo "tag listing..."
-version_tags=$(git ls-remote $REPO -c $BRANCH)
+if [[ "$PREVIOUS_VERSION" == "" ]]; then
+    echo "No previous commits, just getting latest"
+    git ls-remote $REPO -c $BRANCH | awk '{print $1}' > /output/version.txt
+    exit 0
+fi
+
+TMP_DIR=/tmp/checkout
+mkdir -p $TMP_DIR
+cd $TMP_DIR
+
+git init .
+git remote add origin $REPO
+
+git checkout -b base
+git fetch origin --depth 1 $PREVIOUS_VERSION
+git reset --hard FETCH_HEAD
+
+git checkout -b target
+git fetch origin --depth 1 $BRANCH
+git reset --hard FETCH_HEAD
+
+files=$(git diff --name-only base target -- $FILTER_PATH)
 
 echo "echoing to file..."
-echo "$version_tags"| awk '{print $1}' > /input/version.txt
+git rev-parse HEAD > /output/version.txt
