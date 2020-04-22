@@ -22,7 +22,7 @@ describe('version', () => {
     });
 
     it('should create a version.txt file', async () => {
-        await gitHelper.addCommitMessage('test-file-1.txt', 'a message', 'contents');
+        await gitHelper.addCommitMessage('test-file-version-1.txt', 'a message', 'contents');
 
         const testName = 'version-test-1'
         await runner.runTest({ name: testName, action: 'version' });
@@ -35,7 +35,7 @@ describe('version', () => {
     }, TEST_TIMEOUT);
 
     it('should get the latest version', async () => {
-        const commit = await gitHelper.addCommitMessage('test-file-2.txt', 'another message', 'more contents');
+        const commit = await gitHelper.addCommitMessage('test-file-version-2.txt', 'another message', 'more contents');
 
         const testName = 'version-test-2'
         await runner.runTest({ name: testName, action: 'version' });

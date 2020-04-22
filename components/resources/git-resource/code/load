@@ -5,4 +5,7 @@
 printf "Running 'Load' for $REPO:$BRANCH\n"
 
 if [[ "$CHECKOUT_DIR" == "" ]]; then
+    git clone $REPO /input/$CHECKOUT_DIR
+else
+    git clone $REPO /input
 fi
