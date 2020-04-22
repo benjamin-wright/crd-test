@@ -1,6 +1,6 @@
-const runner = require('./test-runner');
-const FileInspector = require('./file-inspector');
-const gitHelper = require('./git-helper');
+const runner = require('./helpers/test-runner');
+const FileInspector = require('./helpers/file-inspector');
+const gitHelper = require('./helpers/git-helper');
 
 const START_TIMEOUT = 20000;
 const TEST_TIMEOUT = 15000;
@@ -32,5 +32,18 @@ describe('load', () => {
 
         const result = await this.fileInspector.list();
         expect(result.files).toContain('input/test-file-load-1.txt');
+    }, TEST_TIMEOUT);
+
+    it('should clone into a subdirectory if "CHECKOUT_DIR" is present', async () => {
+        await gitHelper.addCommitMessage('test-file-load-2.txt', 'and another message', 'yet more contents');
+
+        const testName = 'load-test-2'
+        await runner.runTest({ name: testName, action: 'load', envExtras: [ { name: 'CHECKOUT_DIR', value: 'subdir' } ] });
+
+        this.fileInspector = new FileInspector(testName);
+        await this.fileInspector.waitUntilReady();
+
+        const result = await this.fileInspector.list();
+        expect(result.files).toContain('input/subdir/test-file-load-2.txt');
     }, TEST_TIMEOUT);
 });

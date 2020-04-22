@@ -17,13 +17,13 @@ async function init() {
     await client.loadSpec();
 }
 
-async function runTest({ name, action }) {
+async function runTest({ name, action, envExtras }) {
     await client.api.v1.namespaces(env.namespace).secrets.post({ body: getSecretBody(`${name}-ssh-keys`, env.sshKey, env.sshPublicKey) });
-    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`) });
+    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`, envExtras) });
     await client.api.v1.namespaces(env.namespace).services.post({ body: getServiceBody(name) });
 }
 
-function getJobBody(name, action, secret) {
+function getJobBody(name, action, secret, envExtras) {
     return {
         apiVersion: 'batch/v1',
         kind: 'Job',
@@ -51,6 +51,7 @@ function getJobBody(name, action, secret) {
                                 { name: 'REPO', value: `ssh://${env.user}@${env.host}/git/${env.repo}` },
                                 { name: 'REPO_HOST', value: env.host },
                                 { name: 'BRANCH', value: env.branch },
+                                ...(envExtras ? envExtras : [])
                             ],
                             volumeMounts: [
                                 {

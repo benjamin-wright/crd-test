@@ -1,6 +1,6 @@
-const runner = require('./test-runner');
-const FileInspector = require('./file-inspector');
-const gitHelper = require('./git-helper');
+const runner = require('./helpers/test-runner');
+const FileInspector = require('./helpers/file-inspector');
+const gitHelper = require('./helpers/git-helper');
 
 const START_TIMEOUT = 20000;
 const TEST_TIMEOUT = 10000;
