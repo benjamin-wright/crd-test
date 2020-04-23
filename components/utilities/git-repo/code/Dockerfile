@@ -12,7 +12,8 @@ RUN apk add --no-cache --virtual config_editing sed \
 
 RUN mkdir -p /git/data \
     && mkdir -p /git/data/keys \
-    && mkdir -p /git/data/users
+    && mkdir -p /git/data/users \
+    && git config --system uploadpack.allowReachableSHA1InWant true
 
 WORKDIR /git
 

@@ -2,8 +2,8 @@ const runner = require('./helpers/test-runner');
 const FileInspector = require('./helpers/file-inspector');
 const gitHelper = require('./helpers/git-helper');
 
-const START_TIMEOUT = 20000;
-const TEST_TIMEOUT = 10000;
+const START_TIMEOUT = 30000;
+const TEST_TIMEOUT = 20000;
 
 describe('version', () => {
     beforeAll(async () => {
@@ -45,7 +45,8 @@ describe('version', () => {
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
-            expect(result).toEqual(commit);
+
+            expect(result.trim()).toEqual(commit);
         }, TEST_TIMEOUT);
 
         it('should not ignore files outside of FILTER_PATH', async () => {
@@ -58,7 +59,7 @@ describe('version', () => {
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
-            expect(result).toEqual(commit);
+            expect(result.trim()).toEqual(commit);
         }, TEST_TIMEOUT);
     });
 
@@ -88,7 +89,7 @@ describe('version', () => {
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
-            expect(result).toEqual(currentCommit);
+            expect(result.trim()).toEqual(currentCommit);
         }, TEST_TIMEOUT);
     });
 });

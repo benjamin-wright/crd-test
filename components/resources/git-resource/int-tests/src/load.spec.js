@@ -2,8 +2,8 @@ const runner = require('./helpers/test-runner');
 const FileInspector = require('./helpers/file-inspector');
 const gitHelper = require('./helpers/git-helper');
 
-const START_TIMEOUT = 20000;
-const TEST_TIMEOUT = 15000;
+const START_TIMEOUT = 30000;
+const TEST_TIMEOUT = 20000;
 
 describe('load', () => {
     beforeAll(async () => {

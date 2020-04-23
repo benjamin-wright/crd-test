@@ -6,7 +6,7 @@ printf "Running 'Version' for $REPO:$BRANCH\n"
 
 if [[ "$PREVIOUS_VERSION" == "" ]]; then
     echo "No previous commits, just getting latest"
-    git ls-remote $REPO -c $BRANCH | awk '{print $1}' > /output/version.txt
+    git ls-remote $REPO -c $BRANCH | awk '{print $1}' | tee /output/version.txt
     exit 0
 fi
 
@@ -27,5 +27,4 @@ git reset --hard FETCH_HEAD
 
 files=$(git diff --name-only base target -- $FILTER_PATH)
 
-echo "echoing to file..."
-git rev-parse HEAD > /output/version.txt
+git rev-parse HEAD | tr -d '[:space:]' | tee /output/version.txt

@@ -10,9 +10,13 @@ A resource is a way of checking an external data source for the latest version, 
 
 | Executable | Description                                                               |
 | ---        | ---                                                                       |
-| version    | Writes a string value into the /input/version.txt file                          |
+| version    | Writes a string value into the /input/version.txt file                    |
 | load       | Writes the loaded data to the /input directory (optional)                 |
 | push       | Updates the resource with the content of the /output directory (optional) |
+
+| Variable     | Description                                                   |
+| ---          | ---                                                           |
+| LOAD_VERSION | The version to checkout, as provided by the `version` command |
 
 ```yaml
 apiVersion: "minion.ponglehub.com/v1"

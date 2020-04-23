@@ -49,5 +49,7 @@ async function addCommitMessage(file, message, contents) {
     await repo.push('origin', 'master');
 
     const commit = commitResult.commit;
-    return await repo.revparse([ commit ]);
+    const fullCommit = await repo.revparse([ commit ])
+
+    return fullCommit.trim();
 }
