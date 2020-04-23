@@ -7,12 +7,8 @@ const TEST_TIMEOUT = 20000;
 
 describe('load', () => {
     beforeAll(async () => {
-        try {
-            await runner.init();
-            await gitHelper.init();
-        } catch (err) {
-            console.error(`Init error: ${err}`);
-        }
+        await runner.init();
+        await gitHelper.init();
     }, START_TIMEOUT);
 
     afterEach(async () => {

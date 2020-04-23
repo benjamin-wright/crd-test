@@ -34,7 +34,20 @@ async function init() {
 
     const gitInstance = git();
     await gitInstance.clone(connectionString, repoDir);
-    rootCommit = (await addCommitMessage('root.txt', 'root commit', 'first commits are weird')).commit;
+
+    if (numCommits() === 0) {
+        rootCommit = (await addCommitMessage('root.txt', 'root commit', 'first commits are weird')).commit;
+    }
+}
+
+async function numCommits() {
+    const repo = git(repoDir);
+    try {
+        const logs = await repo.log();
+        return logs.total
+    } catch {
+        return 0;
+    }
 }
 
 async function addCommitMessage(file, message, contents) {
@@ -49,7 +62,7 @@ async function addCommitMessage(file, message, contents) {
     await repo.push('origin', 'master');
 
     const commit = commitResult.commit;
-    const fullCommit = await repo.revparse([ commit ])
+    const fullCommit = await repo.revparse([ commit.replace("(root-commit) ", "") ]);
 
     return fullCommit.trim();
 }

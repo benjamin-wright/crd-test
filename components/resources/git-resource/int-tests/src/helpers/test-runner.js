@@ -2,10 +2,13 @@ const gitResourceImage = process.env['GIT_RESOURCE_IMAGE'];
 const fileInspectorImage = process.env['FILE_INSPECTOR_IMAGE'];
 const env = require('./environment');
 
-const Client = require('kubernetes-client').Client;
-const Request = require('kubernetes-client/backends/request');
+const { Client, KubeConfig } = require('kubernetes-client')
+const Request = require('kubernetes-client/backends/request')
 
-const backend = new Request(Request.config.getInCluster());
+const kubeconfig = new KubeConfig()
+kubeconfig.loadFromCluster()
+const backend = new Request({ kubeconfig })
+
 const client = new Client({ backend });
 
 module.exports = {
