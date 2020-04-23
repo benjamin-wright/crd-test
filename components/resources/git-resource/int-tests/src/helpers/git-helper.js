@@ -51,6 +51,16 @@ async function numCommits() {
 }
 
 async function addCommitMessage(file, message, contents) {
+    const segments = file.split('/');
+    if (segments.length > 1) {
+        const dir = segments.splice(0, segments.length - 1).join('/');
+        console.log(dir);
+        try {
+            await fs.mkdir(`${repoDir}/${dir}`, { recursive: true });
+        } catch (err) {
+        }
+    }
+
     const repo = git(repoDir);
     await fs.writeFile(`${repoDir}/${file}`, contents);
     await repo.add(file);

@@ -25,6 +25,16 @@ git checkout -b target
 git fetch origin --depth 1 $BRANCH
 git reset --hard FETCH_HEAD
 
-files=$(git diff --name-only base target -- $FILTER_PATH)
+if [[ "$FILTER_PATH" != "" ]]; then
+    echo "FILTERING: $FILTER_PATH"
+    files=$(git diff --name-only base target -- $FILTER_PATH)
+    echo "CHANGED FILES: $files"
+    if [[ "$files" == "" ]]; then
+        echo "OUTPUT $PREVIOUS_VERSION"
+        echo $PREVIOUS_VERSION | tee /output/version.txt
+        exit 0
+    fi
+    echo "filter found files"
+fi
 
 git rev-parse HEAD | tr -d '[:space:]' | tee /output/version.txt

@@ -87,5 +87,26 @@ describe('version', () => {
             const result = await this.fileInspector.get('output/version.txt');
             expect(result.trim()).toEqual(currentCommit);
         }, TEST_TIMEOUT);
+
+        it('should not ignore files outside of FILTER_PATH', async () => {
+            const previousCommit = await gitHelper.addCommitMessage('subdir/test-file-version-8.txt', 'another message', 'more contents');
+            await gitHelper.addCommitMessage('test-file-version-8.txt', 'another message', 'more contents');
+
+            const testName = 'version-test-6'
+            await runner.runTest({
+                name: testName,
+                action: 'version',
+                envExtras: [
+                    { name: 'PREVIOUS_VERSION', value: previousCommit },
+                    { name: 'FILTER_PATH', value: 'subdir' }
+                ]
+            });
+
+            this.fileInspector = new FileInspector(testName);
+            await this.fileInspector.waitUntilReady();
+
+            const result = await this.fileInspector.get('output/version.txt');
+            expect(result.trim()).toEqual(previousCommit);
+        }, TEST_TIMEOUT);
     });
 });
