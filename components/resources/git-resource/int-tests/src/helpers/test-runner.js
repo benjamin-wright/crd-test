@@ -20,13 +20,25 @@ async function init() {
     await client.loadSpec();
 }
 
-async function runTest({ name, action, envExtras }) {
+async function runTest({ name, action, envExtras, input }) {
     await client.api.v1.namespaces(env.namespace).secrets.post({ body: getSecretBody(`${name}-ssh-keys`, env.sshKey, env.sshPublicKey) });
-    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`, envExtras) });
+    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`, envExtras, input) });
     await client.api.v1.namespaces(env.namespace).services.post({ body: getServiceBody(name) });
 }
 
-function getJobBody(name, action, secret, envExtras) {
+function getJobBody(name, action, secret, envExtras, input) {
+    const preloadContainer = {
+        name: 'preload',
+        image: 'docker.io/busybox',
+        command: [ '/bin/sh', '-c', `echo "${input ? input.content : 'content'}" > /input/${input ? input.path : 'file.txt'}` ],
+        volumeMounts: [
+            {
+                name: 'inputs',
+                mountPath: '/input'
+            }
+        ]
+    };
+
     return {
         apiVersion: 'batch/v1',
         kind: 'Job',
@@ -46,6 +58,7 @@ function getJobBody(name, action, secret, envExtras) {
                 },
                 spec: {
                     initContainers: [
+                        ...(input ? [ preloadContainer ] : []),
                         {
                             name: 'test',
                             image: gitResourceImage,

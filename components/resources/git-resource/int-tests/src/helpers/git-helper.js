@@ -21,6 +21,7 @@ async function dirMissing(path) {
 module.exports = {
     init,
     addCommitMessage,
+    getLatestCommit,
     rootCommit: () => rootCommit
 }
 
@@ -35,14 +36,15 @@ async function init() {
     const gitInstance = git();
     await gitInstance.clone(connectionString, repoDir);
 
-    if (numCommits() === 0) {
-        rootCommit = (await addCommitMessage('root.txt', 'root commit', 'first commits are weird')).commit;
+    if (await numCommits() === 0) {
+        const response = await addCommitMessage('root.txt', 'root commit', 'first commits are weird');
+        rootCommit = response.commit;
     }
 }
 
 async function numCommits() {
-    const repo = git(repoDir);
     try {
+        const repo = git(repoDir);
         const logs = await repo.log();
         return logs.total
     } catch {
@@ -50,11 +52,10 @@ async function numCommits() {
     }
 }
 
-async function addCommitMessage(file, message, contents) {
+async function addCommitMessage(file, message, contents, branch = 'master') {
     const segments = file.split('/');
     if (segments.length > 1) {
         const dir = segments.splice(0, segments.length - 1).join('/');
-        console.log(dir);
         try {
             await fs.mkdir(`${repoDir}/${dir}`, { recursive: true });
         } catch (err) {
@@ -62,6 +63,11 @@ async function addCommitMessage(file, message, contents) {
     }
 
     const repo = git(repoDir);
+
+    if (branch !== 'master') {
+        await repo.checkoutBranch(branch, 'master');
+    }
+
     await fs.writeFile(`${repoDir}/${file}`, contents);
     await repo.add(file);
 
@@ -69,10 +75,24 @@ async function addCommitMessage(file, message, contents) {
     await repo.addConfig('user.email', `${process.env['USER']}@email.org`);
 
     const commitResult = await repo.commit(message);
-    await repo.push('origin', 'master');
+
+    try {
+        await repo.push('origin', branch);
+    } catch {
+        await repo.push(['-u', 'origin', branch]);
+    }
 
     const commit = commitResult.commit;
     const fullCommit = await repo.revparse([ commit.replace("(root-commit) ", "") ]);
 
     return fullCommit.trim();
+}
+
+async function getLatestCommit(branch) {
+    const repo = git(repoDir);
+    await repo.pull('origin', branch);
+
+    const logs = await repo.log([ `origin/${branch}` ]);
+
+    return logs.latest;
 }

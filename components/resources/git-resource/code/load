@@ -4,7 +4,7 @@
 
 ensure_env CURRENT_VERSION
 
-printf "Running 'Load' for $REPO:$LOAD_VERSION\n"
+printf "Running 'Load' for $REPO:$CURRENT_VERSION\n"
 
 TMP_DIR=/tmp/checkout
 

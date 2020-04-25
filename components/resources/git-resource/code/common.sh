@@ -29,3 +29,6 @@ ensure_env REPO
 ensure_env BRANCH
 
 ssh_setup /data/ssh $REPO_HOST
+
+git config --global user.email "git-version@example.com"
+git config --global user.name "git-version"

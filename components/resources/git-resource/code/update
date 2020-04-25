@@ -1,5 +1,19 @@
 #!/bin/sh
 
-echo "not implemented yet"
+. ./common.sh
 
-exit 1
+ensure_env
+
+TMP_DIR=/tmp/checkout
+mkdir -p $TMP_DIR
+
+git clone $REPO $TMP_DIR
+
+cd $TMP_DIR
+git checkout $BRANCH || git checkout -b $BRANCH
+
+cp /input/* $TMP_DIR
+
+git add .
+git commit -m "updated by git-resource"
+git push -u origin $BRANCH

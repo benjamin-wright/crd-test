@@ -17,7 +17,7 @@ describe('load', () => {
         }
     });
 
-    it('should clone into the input dir', async () => {
+    it('should clone into the output dir', async () => {
         const commit = await gitHelper.addCommitMessage('test-file-load-1.txt', 'another message', 'more contents');
 
         const testName = 'load-test-1'
@@ -43,7 +43,7 @@ describe('load', () => {
         expect(result.files).toContain('output/subdir/test-file-load-2.txt');
     }, TEST_TIMEOUT);
 
-    it('should clone an older commit', async () => {
+    it('should clone an older commit if "CURRENT_VERSION" is set', async () => {
         const commit = await gitHelper.addCommitMessage('test-file-load-3.txt', 'and another message', 'yet more contents');
         await gitHelper.addCommitMessage('test-file-load-4.txt', 'and another message', 'yet more contents');
 
