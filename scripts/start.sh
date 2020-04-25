@@ -27,6 +27,12 @@ function wait-for-kind() {
     echo "finished!";
 }
 
+files=$(find . -name .devspace)
+for file in $files; do
+    echo "removing temp dir: $file"
+    rm -r $file;
+done
+
 kind create --config infrastructure/kind-config.yaml cluster --name $CLUSTER_NAME
 
 wait-for-kind
