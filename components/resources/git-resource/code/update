@@ -2,7 +2,7 @@
 
 . ./common.sh
 
-ensure_env
+ensure_env COMMIT_MESSAGE
 
 TMP_DIR=/tmp/checkout
 mkdir -p $TMP_DIR
@@ -15,5 +15,5 @@ git checkout $BRANCH || git checkout -b $BRANCH
 cp /input/* $TMP_DIR
 
 git add .
-git commit -m "updated by git-resource"
+git commit -m "$COMMIT_MESSAGE"
 git push -u origin $BRANCH

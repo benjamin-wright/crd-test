@@ -5,7 +5,7 @@ const gitHelper = require('./helpers/git-helper');
 const START_TIMEOUT = 30000;
 const TEST_TIMEOUT = 20000;
 
-describe('load', () => {
+describe.skip('load', () => {
     beforeAll(async () => {
         await runner.init();
         await gitHelper.init();

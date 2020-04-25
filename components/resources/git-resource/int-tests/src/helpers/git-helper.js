@@ -22,6 +22,7 @@ module.exports = {
     init,
     addCommitMessage,
     getLatestCommit,
+    getFiles,
     rootCommit: () => rootCommit
 }
 
@@ -95,4 +96,37 @@ async function getLatestCommit(branch) {
     const logs = await repo.log([ `origin/${branch}` ]);
 
     return logs.latest;
+}
+
+async function getFiles() {
+    const files = await listDirectory(`${repoDir}`, '.');
+
+    return files;
+}
+
+async function listDirectory(directory, root) {
+    const names = await fs.readdir(`${root}/${directory}`);
+    const paths = names.filter(
+        name => !name.startsWith('.')
+    ).map(
+        name => `${root}/${name}`
+    );
+
+    const dirs = [];
+    const files = [];
+
+    await forEach(paths, async path => {
+        const stats = await fs.stat(`${root}/${directory}/${path}`);
+
+        if (stats.isDirectory()) { dirs.push(path); }
+        if (stats.isFile()) { files.push(path); }
+    });
+
+    return files;
+}
+
+async function forEach(array, callback) {
+    for (let i = 0; i < array.length; i++) {
+        await callback(array[i]);
+    }
 }

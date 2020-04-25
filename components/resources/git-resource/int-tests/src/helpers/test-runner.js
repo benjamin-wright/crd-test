@@ -20,13 +20,13 @@ async function init() {
     await client.loadSpec();
 }
 
-async function runTest({ name, action, envExtras, input }) {
+async function runTest({ name, action, envExtras, input, commitMessage }) {
     await client.api.v1.namespaces(env.namespace).secrets.post({ body: getSecretBody(`${name}-ssh-keys`, env.sshKey, env.sshPublicKey) });
-    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`, envExtras, input) });
+    await client.apis.batch.v1.namespaces(env.namespace).jobs.post({ body: getJobBody(name, action, `${name}-ssh-keys`, envExtras, input, commitMessage) });
     await client.api.v1.namespaces(env.namespace).services.post({ body: getServiceBody(name) });
 }
 
-function getJobBody(name, action, secret, envExtras, input) {
+function getJobBody(name, action, secret, envExtras, input, commitMessage) {
     const preloadContainer = {
         name: 'preload',
         image: 'docker.io/busybox',
@@ -67,7 +67,8 @@ function getJobBody(name, action, secret, envExtras, input) {
                                 { name: 'REPO', value: `ssh://${env.user}@${env.host}/git/${env.repo}` },
                                 { name: 'REPO_HOST', value: env.host },
                                 { name: 'BRANCH', value: env.branch },
-                                ...(envExtras ? envExtras : [])
+                                ...(envExtras ? envExtras : []),
+                                ...(commitMessage ? [{ name: 'COMMIT_MESSAGE', value: commitMessage }] : [])
                             ],
                             volumeMounts: [
                                 {
