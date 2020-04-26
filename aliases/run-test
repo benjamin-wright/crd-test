@@ -91,7 +91,6 @@ function get-logs-for-container() {
 #      RUN THINGS      #
 ########################
 
-
 devspace deploy --build-sequential
 
 num_jobs=$(get-num-jobs)

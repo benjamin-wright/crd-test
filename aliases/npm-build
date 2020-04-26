@@ -78,6 +78,7 @@ function wait-for-job() {
 ########################
 
 
+devspace purge
 devspace build -b
 
 devspace deploy --deployments first-wave
@@ -90,6 +91,7 @@ for name in $job_names; do
     get-logs-for-pods "$pods"
 done
 
+devspace purge
 devspace deploy --deployments second-wave
 
 job_names=$(get-job-names)
