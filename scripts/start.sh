@@ -33,15 +33,21 @@ for file in $files; do
     rm -r $file;
 done
 
+echo "CREATING KIND CLUSTER"
 kind create --config infrastructure/kind-config.yaml cluster --name $CLUSTER_NAME
-
 wait-for-kind
 
+echo "SETTING UP DEV NAMESPACE"
 kubectl create namespace $NAMESPACE
 devspace use namespace $NAMESPACE
 
+echo "DEPLOYING BASE INFRASTRUCTURE"
 kubectl create namespace infra
 helm dep update infrastructure/helm
 helm upgrade -i --wait infra --namespace infra infrastructure/helm
 
+echo "DEPLOYING CRDS"
 devspace run install-crds
+
+echo "PUBLISHED SHARED NPM MODULES"
+(cd components/utilities/npm-modules; npm-build)

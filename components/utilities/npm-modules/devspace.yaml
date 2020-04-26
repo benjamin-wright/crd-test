@@ -4,9 +4,13 @@ images:
     image: localhost:31500/async-tools
     dockerfile: ./Dockerfile
     context: ./modules/async-tools
+  file-inspector:
+    image: localhost:31500/file-inspector-module
+    dockerfile: ./Dockerfile
+    context: ./modules/file-inspector
 
 deployments:
-- name: chart
+- name: first-wave
   helm:
     chart:
       name: chart
@@ -14,6 +18,14 @@ deployments:
       modules:
       - name: async-tools
         image: localhost:31500/async-tools
+- name: second-wave
+  helm:
+    chart:
+      name: chart
+    values:
+      modules:
+      - name: file-inspector
+        image: localhost:31500/file-inspector-module
 
 dependencies:
 - source:

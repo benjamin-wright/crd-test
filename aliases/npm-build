@@ -78,7 +78,19 @@ function wait-for-job() {
 ########################
 
 
-devspace deploy -b
+devspace build -b
+
+devspace deploy --deployments first-wave
+
+job_names=$(get-job-names)
+
+for name in $job_names; do
+    wait-for-job $name
+    pods=$(get-pods-for-job $name)
+    get-logs-for-pods "$pods"
+done
+
+devspace deploy --deployments second-wave
 
 job_names=$(get-job-names)
 
