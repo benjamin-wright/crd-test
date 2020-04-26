@@ -9,9 +9,24 @@ spec:
   template:
     spec:
       initContainers:
+      - name: install
+        image: {{ .image }}
+        imagePullPolicy: Always
+        args: [ install ]
+        volumeMounts:
+        - name: node-modules
+          mountPath: /var/app/src/node_modules
+        resources:
+          limits:
+            cpu: {{ $.Values.resources.limits.cpu }}
+            memory: {{ $.Values.resources.limits.memory }}
       - name: unit-test
         image: {{ .image }}
-        command: [ 'npm', 'test' ]
+        imagePullPolicy: Always
+        args: [ run, test ]
+        volumeMounts:
+        - name: node-modules
+          mountPath: /var/app/src/node_modules
         resources:
           limits:
             cpu: {{ $.Values.resources.limits.cpu }}
@@ -19,10 +34,17 @@ spec:
       containers:
       - name: publish
         image: {{ .image }}
-        command: [ 'npm', 'run', 'publish' ]
+        imagePullPolicy: Always
+        args: [ publish ]
+        volumeMounts:
+        - name: node-modules
+          mountPath: /var/app/src/node_modules
         resources:
           limits:
             cpu: {{ $.Values.resources.limits.cpu }}
             memory: {{ $.Values.resources.limits.memory }}
       restartPolicy: Never
+      volumes:
+      - name: node-modules
+        emptyDir: {}
 {{- end }}

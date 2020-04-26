@@ -1,0 +1,7 @@
+version: v1beta6
+images:
+  npm-build-image:
+    image: localhost:31500/npm-build-image
+    dockerfile: ./Dockerfile
+    context: ./
+    tag: latest

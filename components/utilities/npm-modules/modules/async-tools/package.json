@@ -1,0 +1,15 @@
+{
+  "name": "@minion-ci/async-tools",
+  "version": "1.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^25.4.0"
+  }
+}

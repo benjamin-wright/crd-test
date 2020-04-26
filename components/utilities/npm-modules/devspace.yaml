@@ -3,7 +3,7 @@ images:
   async-tools:
     image: localhost:31500/async-tools
     dockerfile: ./Dockerfile
-    context: ./async-tools
+    context: ./modules/async-tools
 
 deployments:
 - name: chart
@@ -14,3 +14,7 @@ deployments:
       modules:
       - name: async-tools
         image: localhost:31500/async-tools
+
+dependencies:
+- source:
+    path: ../npm-build-image

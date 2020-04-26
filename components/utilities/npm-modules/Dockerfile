@@ -1,9 +1,3 @@
-FROM node:12.14.0-alpine
+FROM localhost:31500/npm-build-image
 
-COPY package*.json ./
-
-RUN npm ci
-
-COPY ./ ./
-
-ENTRYPOINT [ "/bin/bash" ]
+COPY . .

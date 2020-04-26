@@ -33,9 +33,9 @@ function get-logs-for-pods() {
     for pod in $pods; do
     echo "Pod: $pod"
 
-    containers=$(get-containers-for-pod $pod)
+    containers="install unit-test publish"
     for container in $containers; do
-        echo " - $container"
+        echo -e "\n******** CONTAINER LOGS: $container ********\n"
         echo "$(get-logs-for-container $pod $container)"
     done
 done
@@ -78,7 +78,7 @@ function wait-for-job() {
 ########################
 
 
-devspace deploy
+devspace deploy -b
 
 job_names=$(get-job-names)
 
