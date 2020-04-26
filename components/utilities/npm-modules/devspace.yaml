@@ -1,0 +1,16 @@
+version: v1beta6
+images:
+  async-tools:
+    image: localhost:31500/async-tools
+    dockerfile: ./Dockerfile
+    context: ./async-tools
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      modules:
+      - name: async-tools
+        image: localhost:31500/async-tools

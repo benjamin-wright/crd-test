@@ -1,0 +1,28 @@
+{{- range .Values.modules }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .name }}-{{ $.Release.Revision }}"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      initContainers:
+      - name: unit-test
+        image: {{ .image }}
+        command: [ 'npm', 'test' ]
+        resources:
+          limits:
+            cpu: {{ $.Values.resources.limits.cpu }}
+            memory: {{ $.Values.resources.limits.memory }}
+      containers:
+      - name: publish
+        image: {{ .image }}
+        command: [ 'npm', 'run', 'publish' ]
+        resources:
+          limits:
+            cpu: {{ $.Values.resources.limits.cpu }}
+            memory: {{ $.Values.resources.limits.memory }}
+      restartPolicy: Never
+{{- end }}

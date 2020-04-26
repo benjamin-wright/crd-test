@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -o errexit -o pipefail
+
+export TIMEOUT=180
+
+
+#######################
+#       HELPERS       #
+#######################
+
+
+function get-job-names() {
+    kubectl get job -o json | jq '.items[].metadata.name' -r
+}
+
+function get-pods-for-job() {
+    local job_name=$1
+
+    kubectl get pods -l job-name=$job_name -o json | jq '.items[].metadata.name' -r
+}
+
+function get-containers-for-pod() {
+    local pod_name=$1
+
+    kubectl get pod $pod -o json | jq '.spec | select(.containers != null) | .containers[].name' -r
+    kubectl get pod $pod -o json | jq '.spec | select(.initContainers != null) | .initContainers[].name' -r
+}
+
+function get-logs-for-pods() {
+    local pods=$1
+
+    for pod in $pods; do
+    echo "Pod: $pod"
+
+    containers=$(get-containers-for-pod $pod)
+    for container in $containers; do
+        echo " - $container"
+        echo "$(get-logs-for-container $pod $container)"
+    done
+done
+}
+
+function get-logs-for-container() {
+    local pod_name=$1
+    local container_name=$2
+
+    kubectl logs $pod_name $container_name
+}
+
+function wait-for-job() {
+    local job_name=$1
+    local timeout=$TIMEOUT
+    local start=$(date +%s)
+
+    echo "Waiting for job $job_name to finish...";
+    while [[ true ]]; do
+        local succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
+        local failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
+
+        if [[ "$succeeded" == 1 || "$failed" == 1 ]]; then
+            break
+        fi
+
+        local elapsed=$(expr $(date +%s) - $start)
+        if [[ $elapsed -gt $timeout ]]; then
+            echo "Timed out"
+            exit 1
+        fi
+
+        sleep 0.5
+    done
+}
+
+
+########################
+#      RUN THINGS      #
+########################
+
+
+devspace deploy
+
+job_names=$(get-job-names)
+
+for name in $job_names; do
+    wait-for-job $name
+    pods=$(get-pods-for-job $name)
+    get-logs-for-pods "$pods"
+done

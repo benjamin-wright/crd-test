@@ -1,0 +1,8 @@
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+modules:
+- name: module-name
+  image: image-path

@@ -24,14 +24,9 @@ function wait-for-job() {
     local start=$(date +%s)
 
     echo "Waiting for job $job_name to finish...";
-    local succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
-    local failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
-
     while [[ true ]]; do
-        sleep 0.25
-
-        succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
-        failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
+        local succeeded=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.succeeded")
+        local failed=$(kubectl get jobs -l job-name=$job_name -o json | jq ".items[0].status.failed")
 
         if [[ "$succeeded" == 1 || "$failed" == 1 ]]; then
             break
@@ -42,6 +37,8 @@ function wait-for-job() {
             echo "Timed out"
             exit 1
         fi
+
+        sleep 0.5
     done
 }
 

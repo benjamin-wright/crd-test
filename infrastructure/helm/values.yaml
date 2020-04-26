@@ -15,14 +15,18 @@ docker-registry:
   service:
     type: NodePort
     nodePort: 31500
+
+verdaccio:
+  persistence:
+    enabled: false
   ingress:
     enabled: true
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 0m
       cert-manager.io/cluster-issuer: selfsigning-issuer
     hosts:
-    - docker.ponglehub.co.uk
+    - npm.ponglehub.co.uk
     tls:
     - hosts:
-      - docker.ponglehub.co.uk
-      secretName: tls-cert
+      - npm.ponglehub.co.uk
+      secretName: docker-cert

@@ -11,5 +11,8 @@ dependencies:
 - name: docker-registry
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 1.9.1
-digest: sha256:092baeb2d8081221d60303bd6f4f07fe449b842dd1b2dbd8d1bb7e5af7046f73
-generated: "2020-02-05T09:28:15.247647Z"
+- name: verdaccio
+  repository: https://charts.verdaccio.org
+  version: 0.10.0
+digest: sha256:b78681d0cbf8262e6b0886043330d15273ab997061796672bcbeef8966164bc7
+generated: "2020-04-26T09:14:57.225318+01:00"
