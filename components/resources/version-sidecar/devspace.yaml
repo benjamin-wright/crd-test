@@ -1,0 +1,21 @@
+version: v1beta6
+images:
+  version-sidecar:
+    image: localhost:31500/version-sidecar
+    dockerfile: ./code/Dockerfile
+    context: ./code
+  version-sidecar-tests:
+    image: localhost:31500/version-sidecar-tests
+    dockerfile: ./int-tests/Dockerfile
+    context: ./int-tests
+
+deployments:
+- name: chart
+  helm:
+    chart:
+      name: chart
+    values:
+      image: localhost:31500/version-sidecar
+      test:
+        image: localhost:31500/version-sidecar-tests
+

@@ -12,10 +12,10 @@ images:
     image: localhost:31500/version-monitor
     dockerfile: ./components/operators/version-monitor/Dockerfile
     context: ./components/operators/version-monitor
-  resource-sidecar:
-    image: localhost:31500/resource-sidecar
-    dockerfile: ./components/resources/resource-sidecar/Dockerfile
-    context: ./components/resources/resource-sidecar
+  version-sidecar:
+    image: localhost:31500/version-sidecar
+    dockerfile: ./components/resources/version-sidecar/Dockerfile
+    context: ./components/resources/version-sidecar
   git-resource:
     image: localhost:31500/git-resource
     dockerfile: ./components/resources/git-resource/code/Dockerfile

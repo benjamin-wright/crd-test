@@ -7,7 +7,7 @@ RUN mkdir -p src \
     && cargo build --release \
     && rm -rf src
 
-RUN find . -name '*resource_sidecar*' -delete
+RUN find . -name '*version_sidecar*' -delete
 
 COPY src src
 
@@ -15,6 +15,6 @@ RUN cargo build --release
 
 FROM scratch
 
-COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/resource-sidecar /resource-sidecar
+COPY --from=build /home/rust/src/target/x86_64-unknown-linux-musl/release/version-sidecar /version-sidecar
 
-ENTRYPOINT [ "/resource-sidecar" ]
+ENTRYPOINT [ "/version-sidecar" ]

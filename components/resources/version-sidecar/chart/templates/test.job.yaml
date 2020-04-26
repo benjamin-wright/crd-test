@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "version-sidecar-test-{{ .Release.Revision }}"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccount: version-sidecar-test
+      containers:
+      - name: test
+        image: {{ .Values.test.image }}
+        envFrom:
+        - configMapRef:
+            name: test-env
+        command: ["npm", "test"]
+        {{ include "resources" .Values.resources | indent 8 | trim }}
+      restartPolicy: Never

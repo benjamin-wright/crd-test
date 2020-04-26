@@ -1,0 +1,16 @@
+{
+  "name": "int-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles -i"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^4.1.0",
+    "jest": "^25.2.6",
+    "kubernetes-client": "^8.3.6"
+  }
+}

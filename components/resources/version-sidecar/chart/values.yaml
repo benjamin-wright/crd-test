@@ -1,0 +1,12 @@
+image: localhost/version-sidecar
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+
+test:
+  image: localhost/version-sidecar-tests

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-env
+data:
+  TEST_NAMESPACE: "version-sidecar-test-{{ .Release.Revision }}"
+  SIDECAR_IMAGE: {{ .Values.image }}
