@@ -4,6 +4,8 @@ const fs = require('fs').promises;
 const ssh = require('./ssh-helper');
 const faker = require('faker');
 
+const { forEach } = require('@minion-ci/async-tools');
+
 const connectionString = `ssh://${env.user}@${env.host}/git/${env.repo}`;
 const repoDir = `tmp/checkout-${faker.random.alphaNumeric(8)}`;
 
@@ -123,10 +125,4 @@ async function listDirectory(directory, root) {
     });
 
     return files;
-}
-
-async function forEach(array, callback) {
-    for (let i = 0; i < array.length; i++) {
-        await callback(array[i]);
-    }
 }

@@ -1,12 +1,13 @@
 const env = require('./environment');
 const manifests = require('./manifests');
 
-const { Client, KubeConfig } = require('kubernetes-client')
-const Request = require('kubernetes-client/backends/request')
+const { sleep } = require('@minion-ci/async-tools');
 
-const kubeconfig = new KubeConfig()
-kubeconfig.loadFromCluster()
-const backend = new Request({ kubeconfig })
+const { Client, KubeConfig } = require('kubernetes-client');
+const Request = require('kubernetes-client/backends/request');
+const kubeconfig = new KubeConfig();
+kubeconfig.loadFromCluster();
+const backend = new Request({ kubeconfig });
 const client = new Client({ backend });
 
 module.exports = {
@@ -23,10 +24,6 @@ async function runTest(name, version) {
     await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
 
     return new Sidecar(name);
-}
-
-async function sleep(timeout) {
-    return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
 class Sidecar {

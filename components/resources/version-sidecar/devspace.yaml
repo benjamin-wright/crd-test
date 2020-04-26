@@ -8,6 +8,10 @@ images:
     image: localhost:31500/version-sidecar-tests
     dockerfile: ./int-tests/Dockerfile
     context: ./int-tests
+    build:
+      docker:
+        options:
+          network: host
 
 deployments:
 - name: chart

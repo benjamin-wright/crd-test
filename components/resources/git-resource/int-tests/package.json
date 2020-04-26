@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@minion-ci/async-tools": "^1.0.1",
     "faker": "^4.1.0",
     "jest": "^25.3.0",
     "kubernetes-client": "^8.3.7",

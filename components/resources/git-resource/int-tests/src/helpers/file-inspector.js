@@ -1,5 +1,6 @@
 const http = require('http');
 const namespace = require('./environment').namespace;
+const { sleep } = require('@minion-ci/async-tools');
 
 async function call(url, method) {
     return new Promise((resolve, reject) => {
@@ -38,10 +39,6 @@ async function call(url, method) {
 
         req.end();
     });
-}
-
-async function sleep(timeout) {
-    return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
 module.exports = class FileInspector {
