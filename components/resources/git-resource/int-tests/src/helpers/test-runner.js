@@ -1,5 +1,3 @@
-const gitResourceImage = process.env['GIT_RESOURCE_IMAGE'];
-const fileInspectorImage = process.env['FILE_INSPECTOR_IMAGE'];
 const env = require('./environment');
 
 const { Client, KubeConfig } = require('kubernetes-client')
@@ -8,7 +6,6 @@ const Request = require('kubernetes-client/backends/request')
 const kubeconfig = new KubeConfig()
 kubeconfig.loadFromCluster()
 const backend = new Request({ kubeconfig })
-
 const client = new Client({ backend });
 
 module.exports = {
@@ -61,7 +58,7 @@ function getJobBody(name, action, secret, envExtras, input, commitMessage) {
                         ...(input ? [ preloadContainer ] : []),
                         {
                             name: 'test',
-                            image: gitResourceImage,
+                            image: env.resourceImage,
                             command: [ `./${action}` ],
                             env: [
                                 { name: 'REPO', value: `ssh://${env.user}@${env.host}/git/${env.repo}` },
@@ -90,7 +87,7 @@ function getJobBody(name, action, secret, envExtras, input, commitMessage) {
                     containers: [
                         {
                             name: 'reporter',
-                            image: fileInspectorImage,
+                            image: env.inspectorImage,
                             volumeMounts: [
                                 {
                                     name: 'inputs',
