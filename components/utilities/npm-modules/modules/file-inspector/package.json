@@ -4,11 +4,14 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@minion-ci/async-tools": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^25.4.0"
   }
 }
