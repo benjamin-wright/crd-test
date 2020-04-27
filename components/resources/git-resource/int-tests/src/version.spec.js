@@ -1,9 +1,11 @@
 const runner = require('./helpers/test-runner');
-const FileInspector = require('./helpers/file-inspector');
+const FileInspector = require('@minion-ci/file-inspector');
 const gitHelper = require('./helpers/git-helper');
 
 const START_TIMEOUT = 30000;
 const TEST_TIMEOUT = 20000;
+
+const env = require('./helpers/environment');
 
 describe('version', () => {
     beforeAll(async () => {
@@ -24,7 +26,7 @@ describe('version', () => {
             const testName = 'version-test-1'
             await runner.runTest({ name: testName, action: 'version' });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.list();
@@ -37,7 +39,7 @@ describe('version', () => {
             const testName = 'version-test-2'
             await runner.runTest({ name: testName, action: 'version' });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
@@ -51,7 +53,7 @@ describe('version', () => {
             const testName = 'version-test-3'
             await runner.runTest({ name: testName, action: 'version', envExtras: [ { name: 'FILTER_PATH', value: 'subdir' } ] });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
@@ -67,7 +69,7 @@ describe('version', () => {
             const testName = 'version-test-4'
             await runner.runTest({ name: testName, action: 'version', envExtras: [ { name: 'PREVIOUS_VERSION', value: previousCommit } ] });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.list();
@@ -81,7 +83,7 @@ describe('version', () => {
             const testName = 'version-test-5'
             await runner.runTest({ name: testName, action: 'version', envExtras: [ { name: 'PREVIOUS_VERSION', value: previousCommit } ] });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');
@@ -102,7 +104,7 @@ describe('version', () => {
                 ]
             });
 
-            this.fileInspector = new FileInspector(testName);
+            this.fileInspector = new FileInspector(testName, env.namespace);
             await this.fileInspector.waitUntilReady();
 
             const result = await this.fileInspector.get('output/version.txt');

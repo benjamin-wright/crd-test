@@ -1,9 +1,11 @@
 const runner = require('./helpers/test-runner');
-const FileInspector = require('./helpers/file-inspector');
+const FileInspector = require('@minion-ci/file-inspector');
 const gitHelper = require('./helpers/git-helper');
 
 const START_TIMEOUT = 30000;
 const TEST_TIMEOUT = 20000;
+
+const env = require('./helpers/environment');
 
 describe('load', () => {
     beforeAll(async () => {
@@ -23,7 +25,7 @@ describe('load', () => {
         const testName = 'load-test-1'
         await runner.runTest({ name: testName, action: 'load', envExtras: [ { name: 'CURRENT_VERSION', value: commit } ] });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const result = await this.fileInspector.list();
@@ -36,7 +38,7 @@ describe('load', () => {
         const testName = 'load-test-2'
         await runner.runTest({ name: testName, action: 'load', envExtras: [ { name: 'CURRENT_VERSION', value: commit }, { name: 'CHECKOUT_DIR', value: 'subdir' } ] });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const result = await this.fileInspector.list();
@@ -50,7 +52,7 @@ describe('load', () => {
         const testName = 'load-test-3'
         await runner.runTest({ name: testName, action: 'load', envExtras: [ { name: 'CURRENT_VERSION', value: commit } ] });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const result = await this.fileInspector.list();

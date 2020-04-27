@@ -1,9 +1,11 @@
 const runner = require('./helpers/test-runner');
-const FileInspector = require('./helpers/file-inspector');
+const FileInspector = require('@minion-ci/file-inspector');
 const gitHelper = require('./helpers/git-helper');
 
 const START_TIMEOUT = 30000;
 const TEST_TIMEOUT = 20000;
+
+const env = require('./helpers/environment');
 
 describe('update', () => {
     beforeAll(async () => {
@@ -26,7 +28,7 @@ describe('update', () => {
             commitMessage: 'commit message 1'
         });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const commit = await gitHelper.getLatestCommit('master');
@@ -46,7 +48,7 @@ describe('update', () => {
             envExtras: [ { name: 'BRANCH', value: 'branch-1' } ]
         });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const commit = await gitHelper.getLatestCommit('branch-1');
@@ -68,7 +70,7 @@ describe('update', () => {
             envExtras: [ { name: 'BRANCH', value: 'branch-2' } ]
         });
 
-        this.fileInspector = new FileInspector(testName);
+        this.fileInspector = new FileInspector(testName, env.namespace);
         await this.fileInspector.waitUntilReady();
 
         const commit = await gitHelper.getLatestCommit('branch-2');
