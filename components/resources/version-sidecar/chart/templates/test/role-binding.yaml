@@ -1,12 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: version-sidecar
+  name: version-sidecar-test
 subjects:
 - kind: ServiceAccount
-  name: version-sidecar
-  namespace: {{ template "test.namespace" . }}
+  name: version-sidecar-test
+  namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: version-sidecar
+  name: version-sidecar-test

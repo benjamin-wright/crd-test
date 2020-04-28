@@ -2,7 +2,7 @@ module.exports = {
     test
 }
 
-function test(name, image, version) {
+function test(namespace, name, image, version) {
     const versionInjector = {
         name: 'setup',
         image: 'busybox',
@@ -25,13 +25,14 @@ function test(name, image, version) {
             backoffLimit: 0,
             template: {
                 spec: {
+                    serviceAccount: 'version-sidecar',
                     initContainers: (version !== undefined ? [ versionInjector ] : []),
                     containers: [
                         {
                             name: 'sidecar',
                             image: image,
                             env: [
-                                { name: 'NAME', value: 'VALUE' }
+                                { name: 'TEST_NAMESPACE', value: namespace }
                             ],
                             volumeMounts: [
                                 {

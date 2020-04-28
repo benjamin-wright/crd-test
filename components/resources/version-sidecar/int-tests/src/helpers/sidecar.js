@@ -20,8 +20,10 @@ async function init() {
 }
 
 async function runTest(name, version) {
-    const manifest = manifests.test(name, env.sidecarImage, version);
-    await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
+    const manifest = manifests.test(env.testNamespace, name, env.sidecarImage, version);
+    const result = await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
+
+    console.log(JSON.stringify(result, null, 2));
 
     return new Sidecar(name);
 }

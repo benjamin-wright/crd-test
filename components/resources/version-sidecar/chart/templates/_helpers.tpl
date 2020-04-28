@@ -7,3 +7,7 @@ resources:
     memory: {{ .limits.memory }}
     cpu: {{ .limits.cpu }}
 {{- end -}}
+
+{{- define "test.namespace" -}}
+version-sidecar-test-{{ .Release.Revision }}
+{{- end -}}

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "version-sidecar-test-{{ .Release.Revision }}"
+  name: "{{ template "test.namespace" . }}"
 spec:
   backoffLimit: 0
   template:
