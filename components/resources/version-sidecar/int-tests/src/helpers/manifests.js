@@ -2,6 +2,21 @@ module.exports = {
     test
 }
 
+function version(name, resource, pipeline, version) {
+    return {
+        apiVersion: 'minion.ponglehub.com',
+        kind: 'Version',
+        metadata: {
+            name
+        },
+        spec: {
+            resource,
+            pipeline,
+            version
+        }
+    }
+}
+
 function test(namespace, name, image, version) {
     const versionInjector = {
         name: 'setup',
