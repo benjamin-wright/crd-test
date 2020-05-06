@@ -21,9 +21,7 @@ async function init() {
 
 async function runTest(name, version) {
     const manifest = manifests.test(env.testNamespace, name, env.sidecarImage, version);
-    const result = await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
-
-    console.log(JSON.stringify(result, null, 2));
+    await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
 
     return new Sidecar(name);
 }

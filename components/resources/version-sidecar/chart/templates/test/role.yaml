@@ -6,3 +6,6 @@ rules:
 - apiGroups: ["", "batch"]
   resources: ["jobs"]
   verbs: ["create", "delete", "get"]
+- apiGroups: ["minion.ponglehub.com"]
+  resources: ["versions"]
+  verbs: ["create", "delete", "get", "list"]

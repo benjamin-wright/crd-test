@@ -1,20 +1,6 @@
 module.exports = {
-    test
-}
-
-function version(name, resource, pipeline, version) {
-    return {
-        apiVersion: 'minion.ponglehub.com',
-        kind: 'Version',
-        metadata: {
-            name
-        },
-        spec: {
-            resource,
-            pipeline,
-            version
-        }
-    }
+    test,
+    version
 }
 
 function test(namespace, name, image, version) {
@@ -66,6 +52,21 @@ function test(namespace, name, image, version) {
                     ]
                 }
             }
+        }
+    }
+}
+
+function version(name, resource, pipeline, version) {
+    return {
+        apiVersion: 'minion.ponglehub.com/v1',
+        kind: 'Version',
+        metadata: {
+            name
+        },
+        spec: {
+            resource,
+            pipeline,
+            version
         }
     }
 }

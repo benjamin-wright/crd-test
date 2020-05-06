@@ -13,14 +13,7 @@ use versions::api::{ get_versions };
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("Getting version number");
-    let version = get_version().await?;
 
-    println!("Version: '{}'", &version);
-
-    Ok(())
-}
-
-async fn get_version() -> anyhow::Result<String> {
     let namespace = match env::var("TEST_NAMESPACE") {
         Ok(namespace) => namespace,
         Err(_) => {
@@ -28,6 +21,16 @@ async fn get_version() -> anyhow::Result<String> {
         }
     };
 
+    let version = get_version().await?;
+    println!("Version: '{}'", &version);
+
+    let versions = get_versions(&namespace).await?;
+    println!("Versions: {:?}", versions);
+
+    Ok(())
+}
+
+async fn get_version() -> anyhow::Result<String> {
     let mut file = match File::open("/output/version.txt") {
         Ok(file) => file,
         Err(err) => {
@@ -47,10 +50,6 @@ async fn get_version() -> anyhow::Result<String> {
     if trimmed.len() <= 0 {
         return Err(anyhow!("Version number must be at least one character long"))
     }
-
-    let versions = get_versions(&namespace).await?;
-
-    println!("Versions: {:?}", versions);
 
     Ok(trimmed.to_string())
 }
