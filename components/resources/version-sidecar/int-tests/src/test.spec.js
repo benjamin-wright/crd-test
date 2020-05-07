@@ -25,7 +25,7 @@ describe('version-sidecar', () => {
 
     it('should pass if the version file is present', async () => {
         await api.create('test', { resource: 'res', pipeline: 'pipeline', version: 'abcd' });
-        const test = await sidecar.runTest('test-3', 'abcdefg');
+        const test = await sidecar.runTest('test-3', 'abcdefg', 'resource', 'pipeline');
         const status = await test.exitStatus();
 
         expect(status).toEqual("Succeeded");

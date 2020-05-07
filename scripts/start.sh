@@ -50,4 +50,4 @@ echo "DEPLOYING CRDS"
 devspace run install-crds
 
 echo "PUBLISHED SHARED NPM MODULES"
-(cd components/utilities/npm-modules; npm-build)
+(cd components/utilities/npm-modules; npm-build; devspace purge)

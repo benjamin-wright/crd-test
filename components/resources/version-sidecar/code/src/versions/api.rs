@@ -3,7 +3,7 @@ use super::state::{ Version };
 use serde_json::json;
 
 use kube::{
-    api::{Api, ListParams},
+    api::{Api, ListParams, PostParams},
     Client,
     config
 };
@@ -46,4 +46,15 @@ pub async fn get_versions(namespace: &str) -> anyhow::Result<Vec<Version>> {
     let items = res.items.into_iter().collect::<Vec<Version>>();
 
     Ok(items)
+}
+
+pub async fn add_version(namespace: &str, resource: &str, pipeline: &str, version: &str) -> anyhow::Result<()> {
+    let versions = get_api(namespace);
+
+    let pp = PostParams::default();
+    let body = get_version_body(resource, pipeline, version)?;
+
+    versions.create(&pp, &body).await?;
+
+    Ok(())
 }

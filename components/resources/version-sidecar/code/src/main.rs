@@ -8,26 +8,64 @@ use std::env;
 
 mod versions;
 
-use versions::api::{ get_versions };
+use versions::api::{ get_versions, add_version };
+
+pub struct VersionInputs {
+    pipeline: String,
+    resource: String,
+    namespace: String
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("Getting version number");
 
-    let namespace = match env::var("TEST_NAMESPACE") {
-        Ok(namespace) => namespace,
-        Err(_) => {
-            return Err(anyhow!("Missing required environment variable TEST_NAMESPACE"));
-        }
-    };
+    let inputs = get_inputs()?;
 
     let version = get_version().await?;
     println!("Version: '{}'", &version);
 
-    let versions = get_versions(&namespace).await?;
+    let versions = get_versions(&inputs.namespace).await?;
     println!("Versions: {:?}", versions);
 
+    println!("Adding version:");
+    println!(" - namespace: {:?}", &inputs.namespace);
+    println!(" - resource: {:?}", &inputs.resource);
+    println!(" - pipeline: {:?}", &inputs.pipeline);
+    println!(" - version: {:?}", &version);
+
+    add_version(&inputs.namespace, &inputs.resource, &inputs.pipeline, &version).await?;
+
     Ok(())
+}
+
+fn get_inputs() -> anyhow::Result<VersionInputs> {
+    let namespace = match env::var("NAMESPACE") {
+        Ok(namespace) => namespace,
+        Err(_) => {
+            return Err(anyhow!("Missing required environment variable NAMESPACE"));
+        }
+    };
+
+    let resource = match env::var("RESOURCE") {
+        Ok(resource) => resource,
+        Err(_) => {
+            return Err(anyhow!("Missing required environment variable RESOURCE"));
+        }
+    };
+
+    let pipeline = match env::var("PIPELINE") {
+        Ok(pipeline) => pipeline,
+        Err(_) => {
+            return Err(anyhow!("Missing required environment variable PIPELINE"));
+        }
+    };
+
+    Ok(VersionInputs{
+        namespace: namespace.to_string(),
+        resource: resource.to_string(),
+        pipeline: pipeline.to_string()
+    })
 }
 
 async fn get_version() -> anyhow::Result<String> {

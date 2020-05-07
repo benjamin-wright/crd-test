@@ -3,7 +3,7 @@ module.exports = {
     version
 }
 
-function test(namespace, name, image, version) {
+function test(name, image, { version, namespace, resource, pipeline }) {
     const versionInjector = {
         name: 'setup',
         image: 'busybox',
@@ -33,7 +33,9 @@ function test(namespace, name, image, version) {
                             name: 'sidecar',
                             image: image,
                             env: [
-                                { name: 'TEST_NAMESPACE', value: namespace }
+                                { name: 'NAMESPACE', value: namespace },
+                                { name: 'RESOURCE', value: resource },
+                                { name: 'PIPELINE', value: pipeline }
                             ],
                             volumeMounts: [
                                 {

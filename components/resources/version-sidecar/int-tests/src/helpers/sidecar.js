@@ -19,8 +19,12 @@ async function init() {
     await client.loadSpec();
 }
 
-async function runTest(name, version) {
-    const manifest = manifests.test(env.testNamespace, name, env.sidecarImage, version);
+async function runTest(name, version, resource, pipeline) {
+    const manifest = manifests.test(
+        name,
+        env.sidecarImage,
+        { version, namespace: env.testNamespace, resource, pipeline }
+    );
     await client.apis.batch.v1.namespaces(env.testNamespace).jobs.post({ body: manifest });
 
     return new Sidecar(name);
