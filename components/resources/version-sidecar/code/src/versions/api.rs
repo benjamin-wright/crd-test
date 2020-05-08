@@ -8,6 +8,13 @@ use kube::{
     config
 };
 
+pub struct VersionData {
+    pub namespace: String,
+    pub resource: String,
+    pub pipeline: String,
+    pub version: String
+}
+
 fn get_version_body(resource: &str, pipeline: &str, version: &str) -> anyhow::Result<Version> {
     let version: Version = serde_json::from_value(json!({
         "apiVersion": "minion.ponglehub.com/v1",
@@ -37,7 +44,7 @@ fn get_api(namespace: &str) -> Api<Version> {
     return versions;
 }
 
-pub async fn get_versions(namespace: &str) -> anyhow::Result<Vec<Version>> {
+pub async fn get_versions(namespace: &str) -> anyhow::Result<Vec<VersionData>> {
     let versions = get_api(namespace);
 
     let lp = ListParams::default();
@@ -45,7 +52,26 @@ pub async fn get_versions(namespace: &str) -> anyhow::Result<Vec<Version>> {
 
     let items = res.items.into_iter().collect::<Vec<Version>>();
 
-    Ok(items)
+    let mut results = vec![];
+
+    for item in items {
+        let namespace = match item.metadata.namespace.as_ref() {
+            Some(namespace) => namespace,
+            None => {
+                println!("Version missing a namespace");
+                continue;
+            }
+        };
+
+        results.push(VersionData{
+            namespace: namespace.to_string(),
+            resource: item.spec.resource.to_string(),
+            pipeline: item.spec.pipeline.to_string(),
+            version: item.spec.version.to_string()
+        });
+    }
+
+    Ok(results)
 }
 
 pub async fn add_version(namespace: &str, resource: &str, pipeline: &str, version: &str) -> anyhow::Result<()> {

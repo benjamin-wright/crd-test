@@ -8,7 +8,7 @@ use std::env;
 
 mod versions;
 
-use versions::api::{ get_versions, add_version };
+use versions::api::{ get_versions, add_version, VersionData };
 
 pub struct VersionInputs {
     pipeline: String,
@@ -23,20 +23,36 @@ async fn main() -> anyhow::Result<()> {
     let inputs = get_inputs()?;
 
     let version = get_version().await?;
-    println!("Version: '{}'", &version);
 
-    let versions = get_versions(&inputs.namespace).await?;
-    println!("Versions: {:?}", versions);
-
-    println!("Adding version:");
+    println!("Version data:");
     println!(" - namespace: {:?}", &inputs.namespace);
     println!(" - resource: {:?}", &inputs.resource);
     println!(" - pipeline: {:?}", &inputs.pipeline);
     println!(" - version: {:?}", &version);
 
-    add_version(&inputs.namespace, &inputs.resource, &inputs.pipeline, &version).await?;
+    let versions = get_versions(&inputs.namespace).await?;
+    if exists(versions, &version, &inputs) {
+        println!("Version already exists!");
+    } else {
+        println!("Adding version...");
+        add_version(&inputs.namespace, &inputs.resource, &inputs.pipeline, &version).await?;
+        println!("Done");
+    }
 
     Ok(())
+}
+
+fn exists(versions: Vec<VersionData>, version: &str, inputs: &VersionInputs) -> bool {
+    for v in versions {
+        let matches = v.namespace == inputs.namespace
+            && v.pipeline == inputs.pipeline
+            && v.resource == inputs.resource
+            && v.version == version;
+
+        if matches { return true; }
+    }
+
+    false
 }
 
 fn get_inputs() -> anyhow::Result<VersionInputs> {
