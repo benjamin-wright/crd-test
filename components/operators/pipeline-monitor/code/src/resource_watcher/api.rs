@@ -1,5 +1,6 @@
 use crate::resources::state::{ EnvVar, Secret };
 
+use anyhow::anyhow;
 use serde_json::{Value, Map, json};
 
 use kube::{
@@ -9,6 +10,7 @@ use kube::{
     runtime::Reflector
 };
 use k8s_openapi::api::batch::v1beta1::CronJob;
+use std::env;
 
 fn get_api_client() -> Client {
     // Load the kubeconfig file.
@@ -85,6 +87,7 @@ fn make_volumes(secrets: &Vec<Secret>) -> Vec<Map<String, Value>> {
 
 struct ResourceWatcherParams<'a> {
     name: &'a str,
+    namespace: &'a str,
     image: &'a str,
     pipeline: &'a str,
     resource: &'a str,
@@ -95,7 +98,53 @@ struct ResourceWatcherParams<'a> {
     resource_version: &'a str
 }
 
+fn get_emptydir_volume() -> Map<String, Value> {
+    let mut volume = Map::new();
+
+    volume.insert("name".to_string(), Value::String(String::from("outputs")));
+    volume.insert("emptryDir".to_string(), Value::Object(Map::new()));
+
+    return volume;
+}
+
 fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<CronJob> {
+    let sidecar_image = match env::var("SIDECAR_IMAGE") {
+        Ok(image) => image,
+        Err(_) => {
+            return Err(anyhow!("Missing required environment variable SIDECAR_IMAGE"));
+        }
+    };
+
+    let ns_env = EnvVar{
+        name: String::from("NAMESPACE"),
+        value: params.namespace.to_string()
+    };
+
+    let rs_env = EnvVar{
+        name: String::from("RESOURCE"),
+        value: params.resource.to_string()
+    };
+
+    let pi_env = EnvVar{
+        name: String::from("PIPELINE"),
+        value: params.pipeline.to_string()
+    };
+
+    let sidecar_env = vec![ ns_env, rs_env, pi_env ];
+
+    let mut volume_mounts = vec![];
+    for mount in params.volume_mounts {
+        volume_mounts.push(mount);
+    }
+
+    let mut volumes = vec![];
+    for volume in params.volumes {
+        volumes.push(volume);
+    }
+
+    let empty_dir = get_emptydir_volume();
+    volumes.push(&empty_dir);
+
     let cron_job: CronJob = serde_json::from_value(json!({
         "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
@@ -128,13 +177,20 @@ fn get_resource_watcher_body(params: &ResourceWatcherParams) -> anyhow::Result<C
                             }
                         },
                         "spec": {
-                            "containers": [
+                            "initContainers": [
                                 {
                                     "name": params.name,
                                     "image": params.image,
                                     "command": ["./version"],
                                     "env": params.env,
                                     "volumeMounts": params.volume_mounts
+                                }
+                            ],
+                            "containers": [
+                                {
+                                    "name": "sidecar",
+                                    "image": sidecar_image,
+                                    "env": sidecar_env
                                 }
                             ],
                             "volumes": params.volumes,
@@ -157,6 +213,7 @@ pub async fn deploy_resource_watcher(name: &str, image: &str, pipeline: &str, re
 
     let cron_job = get_resource_watcher_body(&ResourceWatcherParams {
         name,
+        namespace,
         image,
         pipeline,
         resource,
@@ -188,6 +245,7 @@ pub async fn update_resource_watcher(name: &str, image: &str, pipeline: &str, re
 
     let cron_job = get_resource_watcher_body(&ResourceWatcherParams {
         name,
+        namespace,
         image,
         pipeline,
         resource,

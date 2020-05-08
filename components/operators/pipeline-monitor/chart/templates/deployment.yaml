@@ -18,6 +18,9 @@ spec:
       containers:
       - name: pipeline-monitor
         image: {{ .Values.image }}
+        env:
+        - name: SIDECAR_IMAGE
+          value: {{ .Values.sidecar.image }}
         resources:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}

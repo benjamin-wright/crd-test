@@ -5,6 +5,9 @@ resources:
     cpu: 100m
     memory: 64Mi
 
+sidecar:
+  image: localhost/version-sidecar
+
 test:
   enabled: false
   image: localhost/pipeline-monitor-tests

@@ -8,6 +8,10 @@ images:
     image: localhost:31500/pipeline-monitor-tests
     dockerfile: ./int-tests/Dockerfile
     context: ./int-tests
+  version-sidecar:
+    image: localhost:31500/version-sidecar
+    dockerfile: ../../resources/version-sidecar/code/Dockerfile
+    context: ../../resources/version-sidecar/code
 
 deployments:
 - name: chart
@@ -16,6 +20,8 @@ deployments:
       name: chart
     values:
       image: localhost:31500/pipeline-monitor
+      sidecar:
+        image: localhost:31500/version-sidecar
       test:
         enabled: true
         image: localhost:31500/pipeline-monitor-tests
